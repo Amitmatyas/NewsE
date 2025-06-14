@@ -69,6 +69,36 @@
             100% { opacity: 1; -webkit-transform: scale3d(1.0, 1.0, 1.0); transform: scale3d(1.0, 1.0, 1.0); }
         }
 
+        /* --- Loading Screen --- */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-family: 'Rubik', sans-serif;
+            font-size: 2em;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        #loading-screen img {
+            height: 100px;
+            margin-bottom: 20px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         /* --- Header & Navigation --- */
         header {
             display: flex;
@@ -378,9 +408,14 @@
     </style>
 </head>
 <body>
-    <header>
+    <div id="loading-screen">
+        <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="NewsE Logo">
+        טוען...
+    </div>
+
+    <header style="display: none;">
         <a href="#" id="home-link" class="logo-container">
-            <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="Logo">
+            <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="NewsE Logo">
             <h1>NewsE</h1>
         </a>
         <nav>
@@ -393,7 +428,7 @@
         </nav>
     </header>
 
-    <div class="container">
+    <div class="container" style="display: none;">
         <div id="app-content">
             </div>
     </div>
@@ -405,19 +440,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // --- 1. Supabase Configuration ---
-        // !!! REPLACE WITH YOUR ACTUAL SUPABASE URL AND ANON KEY !!!
-        const SUPABASE_URL = 'https://iykdngupkwmtuwqrsus.supabase.co'; // Replace with your actual URL
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5a2RuZ3Vwa3dtdHV3cXJzc3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MDI1MTUsImV4cCI6MjA2NTQ3ODUxNX0.wUM5KMInXNLhYOWACj6L7Lq3MApaVBzavxW8rMibJGU'; // Replace with your actual Anon Key
+        const SUPABASE_URL = 'https://iykdngupkwmtuwqrsus.supabase.co'; // ה-URL של הפרויקט שלך ב-Supabase
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5a2RuZ3Vwa3dtdHV3cXJzc3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MDI1MTUsImV4cCI6MjA2NTQ3ODUxNX0.wUM5KMInXNLhYOWACj6L7Lq3MApaVBzavxW8rMibJGU'; // המפתח הציבורי שלך מ-Supabase
 
         const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // --- 2. DOM Elements ---
+        const loadingScreen = document.getElementById('loading-screen');
         const appContent = document.getElementById('app-content');
         const homeLink = document.getElementById('home-link');
         const createArticleBtn = document.getElementById('create-article-btn');
         const signupBtnNav = document.getElementById('signup-btn-nav');
         const loginBtnNav = document.getElementById('login-btn-nav');
         const logoutBtn = document.getElementById('logout-btn');
+        const header = document.querySelector('header');
+        const container = document.querySelector('.container');
 
         let currentUser = null; // Holds the currently logged-in user object
 
@@ -684,14 +721,21 @@
             updateAuthUI(); // Ensure UI is updated with every route change
         }
 
-        // Listen for hash changes in the URL
-        window.addEventListener('hashchange', handleHashChange);
-
-        // Initial page load
+        // --- 8. Initialization and Loading Screen ---
         document.addEventListener('DOMContentLoaded', () => {
             updateAuthUI();
             handleHashChange(); // Load the correct page based on current hash
+
+            // Hide loading screen and show the rest of the content after a short delay
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                header.style.display = 'flex';
+                container.style.display = 'block';
+            }, 1000); // Adjust the delay (in milliseconds) as needed
         });
+
+        // Listen for hash changes in the URL
+        window.addEventListener('hashchange', handleHashChange);
 
         // Navigation button event listeners
         signupBtnNav.addEventListener('click', () => { window.location.hash = '#signup'; });
