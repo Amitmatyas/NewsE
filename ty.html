@@ -723,8 +723,11 @@
         const sidebarLoginLink = document.getElementById('sidebar-login-link');
         const sidebarSignupLink = document.getElementById('sidebar-signup-link');
         const sidebarMyAccountLink = document.getElementById('sidebar-my-account-link');
-        const sidebarCreateArticleLink = document.getElementById('sidebar-create-article-link');
-        const sidebarLogoutLink = document.getElementById('sidebar-logout-link');
+sidebarCreateArticleLink.addEventListener('click', (event) => {
+    event.preventDefault(); // מונע את פעולת הניווט הרגילה של הקישור
+    window.location.hash = '#create-article';
+    console.log('Attempting to navigate to #create-article'); // הוסף הודעת בדיקה
+});        const sidebarLogoutLink = document.getElementById('sidebar-logout-link');
         const header = document.querySelector('header');
         const container = document.querySelector('.container');
         const confirmationModal = document.getElementById('confirmation-modal');
