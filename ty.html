@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NewsE</title>
-    <!-- Favicon -->
     <link rel="icon" href="https://i.postimg.cc/Zq1wqMBP/2.png" type="image/x-icon">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts: Poppins (for general text) & Rubik (for titles) & Heebo (for Hebrew text) -->
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Poppins:wght@300;400;600;700&family=Rubik:wght@700&display=swap" rel="stylesheet">
     <style>
         /* --- General & Base Styles --- */
@@ -24,7 +21,6 @@
             --error-color: #dc3545;
             --transition-speed: 0.3s ease;
         }
-
         body {
             font-family: 'Heebo', 'Poppins', sans-serif; /* Heebo for Hebrew, Poppins for others */
             margin: 0;
@@ -37,7 +33,6 @@
             flex-direction: column;
             min-height: 100vh;
         }
-
         .container {
             max-width: 960px;
             margin: 20px auto;
@@ -48,13 +43,11 @@
             animation: fadeIn 0.8s ease-out;
             flex-grow: 1;
         }
-
         /* --- Animations --- */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes bounceIn {
             0%, 20%, 40%, 60%, 80%, 100% {
                 -webkit-animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
@@ -67,7 +60,6 @@
             80% { -webkit-transform: scale3d(0.97, 0.97, 0.97); transform: scale3d(0.97, 0.97, 0.97); }
             100% { opacity: 1; -webkit-transform: scale3d(1.0, 1.0, 1.0); transform: scale3d(1.0, 1.0, 1.0); }
         }
-
         /* --- Loading Screen --- */
         #loading-screen {
             position: fixed;
@@ -86,18 +78,15 @@
             font-size: 2em;
             animation: fadeIn 0.8s ease-out;
         }
-
         #loading-screen img {
             height: 100px;
             margin-bottom: 20px;
             animation: spin 2s linear infinite;
         }
-
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-
         /* --- Header & Navigation --- */
         header {
             display: flex;
@@ -110,7 +99,6 @@
         }
         
         /* Removed .site-title as per request */
-
         header .logo-container { /* Centered logo */
             position: absolute;
             left: 50%;
@@ -124,7 +112,6 @@
         header .logo-container:hover {
             opacity: 0.8;
         }
-
         header .logo-container img {
             height: 50px;
             margin-inline-end: 10px;
@@ -134,7 +121,6 @@
         header .logo-container img:hover {
             transform: rotate(10deg) scale(1.05);
         }
-
         header h1 {
             margin: 0;
             font-family: 'Rubik', 'Heebo', sans-serif;
@@ -142,7 +128,6 @@
             letter-spacing: 1px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-
         /* Hamburger menu icon */
         #menu-toggle-btn {
             background: none;
@@ -158,7 +143,6 @@
         #menu-toggle-btn:hover {
             color: var(--secondary-color);
         }
-
         /* --- Forms & Inputs --- */
         h2 {
             font-family: 'Rubik', 'Heebo', sans-serif;
@@ -170,18 +154,17 @@
             padding-bottom: 10px;
             animation: fadeIn 0.6s ease-out;
         }
-
         form {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-
+        /* Make form inputs and textareas full width */
         input[type="email"],
         input[type="password"],
         input[type="text"],
         textarea {
-            width: 100%;
+            width: 100%; /* Ensure full width */
             padding: 12px 15px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -189,18 +172,15 @@
             box-sizing: border-box; /* Include padding in width */
             transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
         }
-
         /* ONLY apply red border if .is-invalid class is present */
         input.is-invalid, textarea.is-invalid {
             border-color: var(--error-color) !important; /* Red for validation errors */
         }
-
         input:focus, textarea:focus {
             border-color: var(--primary-color);
             outline: none;
             box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
         }
-
         form button[type="submit"] {
             background-color: var(--primary-color);
             color: white;
@@ -216,6 +196,41 @@
         form button[type="submit"]:hover {
             background-color: #3e8e41;
             transform: translateY(-2px);
+        }
+        /* Search Bar Styles */
+        #search-bar-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            width: 100%; /* Ensure search bar takes full width */
+        }
+        #search-input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        #search-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+        #search-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color var(--transition-speed);
+        }
+        #search-button:hover {
+            background-color: #3e8e41;
         }
 
         /* --- Messages --- */
@@ -241,7 +256,6 @@
             color: var(--success-color);
             text-decoration: underline;
         }
-
         /* --- Article List & Card --- */
         #articles-list {
             display: grid;
@@ -249,7 +263,6 @@
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             margin-top: 20px;
         }
-
         .article-card {
             background-color: var(--light-bg);
             padding: 20px;
@@ -304,7 +317,6 @@
             color: #d1a30f;
             text-decoration: underline;
         }
-
         /* --- Single Article View --- */
         #single-article-content {
             background-color: var(--light-bg);
@@ -365,7 +377,6 @@
             color: #3e8e41;
             text-decoration: underline;
         }
-
         /* --- My Account Page --- */
         #my-account-page h3 {
             font-family: 'Rubik', 'Heebo', sans-serif;
@@ -451,7 +462,6 @@
             color: #3e8e41;
             text-decoration: underline;
         }
-
         /* --- Sidebar Menu --- */
         .sidebar {
             height: 100%;
@@ -468,11 +478,9 @@
             display: flex;
             flex-direction: column;
         }
-
         .sidebar.open {
             width: 250px; /* Width when open */
         }
-
         .sidebar a {
             padding: 15px 25px;
             text-decoration: none;
@@ -482,12 +490,10 @@
             transition: 0.3s;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-
         .sidebar a:hover {
             color: var(--secondary-color);
             background-color: rgba(255,255,255,0.1);
         }
-
         .sidebar .closebtn {
             position: absolute;
             top: 0;
@@ -505,7 +511,6 @@
         .sidebar a i { /* Icons in sidebar */
             margin-inline-end: 10px;
         }
-
         /* Overlay */
         .overlay {
             position: fixed;
@@ -519,12 +524,10 @@
             visibility: hidden;
             transition: opacity 0.5s;
         }
-
         .overlay.open {
             opacity: 1;
             visibility: visible;
         }
-
         /* Custom Confirmation Modal */
         .custom-modal {
             display: none; /* Hidden by default */
@@ -539,7 +542,6 @@
             justify-content: center;
             align-items: center;
         }
-
         .modal-content {
             background-color: #fefefe;
             margin: auto;
@@ -552,20 +554,17 @@
             text-align: center;
             animation: bounceIn 0.3s ease-out;
         }
-
         .modal-content h3 {
             color: var(--dark-bg);
             margin-top: 0;
             margin-bottom: 20px;
             font-family: 'Rubik', 'Heebo', sans-serif;
         }
-
         .modal-buttons {
             display: flex;
             justify-content: center;
             gap: 15px;
         }
-
         .modal-buttons button {
             padding: 10px 20px;
             border: none;
@@ -574,28 +573,22 @@
             font-size: 1em;
             transition: background-color var(--transition-speed), transform var(--transition-speed);
         }
-
         .modal-buttons button.confirm-btn {
             background-color: var(--error-color);
             color: white;
         }
-
         .modal-buttons button.confirm-btn:hover {
             background-color: #c82333;
             transform: translateY(-1px);
         }
-
         .modal-buttons button.cancel-btn {
             background-color: var(--border-color);
             color: var(--text-color);
         }
-
         .modal-buttons button.cancel-btn:hover {
             background-color: #aeb6be;
             transform: translateY(-1px);
         }
-
-
         /* --- Responsive adjustments --- */
         @media (max-width: 768px) {
             header {
@@ -639,6 +632,13 @@
             #single-article-content h2 {
                 font-size: 2em;
             }
+             #search-bar-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #search-button {
+                width: 100%;
+            }
         }
         @media (max-width: 480px) {
             header .logo-container h1 {
@@ -664,17 +664,13 @@
         <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="NewsE Logo">
         טוען...
     </div>
-
     <header style="display: none;">
-        <!-- Removed <a href="#" id="site-title-link" class="site-title">NewsE</a> as requested -->
         <a href="#" id="home-link" class="logo-container">
             <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="NewsE Logo">
             <h1>NewsE</h1>
         </a>
         <button id="menu-toggle-btn"><i class="fas fa-bars"></i></button>
     </header>
-
-    <!-- Sidebar Menu -->
     <div id="sidebar-menu" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" id="close-sidebar-btn">&times;</a>
         <a href="#login" id="sidebar-login-link" style="display: none;"><i class="fas fa-sign-in-alt"></i> התחברות</a>
@@ -683,11 +679,7 @@
         <a href="#" id="sidebar-create-article-link" style="display: none;"><i class="fas fa-plus"></i> צור כתבה חדשה</a>
         <a href="#" id="sidebar-logout-link" style="display: none; color: var(--error-color);"><i class="fas fa-sign-out-alt"></i> התנתק</a>
     </div>
-
-    <!-- Overlay when sidebar is open -->
     <div id="overlay" class="overlay"></div>
-
-    <!-- Custom Confirmation Modal -->
     <div id="confirmation-modal" class="custom-modal">
         <div class="modal-content">
             <h3 id="modal-message">האם אתה בטוח שברצונך למחוק את הכתבה הזו?</h3>
@@ -697,17 +689,10 @@
             </div>
         </div>
     </div>
-
-
     <div class="container" style="display: none;">
         <div id="app-content">
-            <!-- Dynamic content will be loaded here by JavaScript -->
-        </div>
+            </div>
     </div>
-
-    <!-- Removed footer as requested -->
-
-    <!-- Firebase SDKs - MUST be loaded BEFORE your custom JavaScript -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -722,7 +707,6 @@
             appId: "1:894509181268:web:c8ac6305f23fa003e3c0c1",
             measurementId: "G-BE0R2WQ35J"
         };
-
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
@@ -736,21 +720,18 @@
         const sidebarMenu = document.getElementById('sidebar-menu');
         const closeSidebarBtn = document.getElementById('close-sidebar-btn');
         const overlay = document.getElementById('overlay');
-
         const sidebarLoginLink = document.getElementById('sidebar-login-link');
         const sidebarSignupLink = document.getElementById('sidebar-signup-link');
         const sidebarMyAccountLink = document.getElementById('sidebar-my-account-link');
         const sidebarCreateArticleLink = document.getElementById('sidebar-create-article-link');
         const sidebarLogoutLink = document.getElementById('sidebar-logout-link');
-
         const header = document.querySelector('header');
         const container = document.querySelector('.container');
-
         const confirmationModal = document.getElementById('confirmation-modal');
         const modalMessage = document.getElementById('modal-message');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-
+        
         let currentUser = null; // Holds the currently logged-in user object
         let currentEditingArticleId = null; // To store article ID for editing
 
@@ -765,7 +746,6 @@
             const target = document.getElementById(targetElementId);
             if (!target) return;
             target.innerHTML = `<div class="${type}-message">${message}</div>`;
-            // The class is added/removed when message is set. No need to clear old class manually from element.
         }
 
         async function updateAuthUI() {
@@ -796,6 +776,25 @@
         function closeSidebar() {
             sidebarMenu.classList.remove('open');
             overlay.classList.remove('open');
+        }
+
+        // Custom modal to show info/error instead of native alert/confirm
+        function showInfoModal(message, callback = null) {
+            modalMessage.innerHTML = message;
+            confirmDeleteBtn.style.display = 'none'; // Hide confirm button
+            cancelDeleteBtn.textContent = 'סגור'; // Change cancel button to close
+            confirmationModal.style.display = 'flex'; // Show modal
+            
+            // Reattach event listener for close button to run callback if provided
+            const tempCloseHandler = () => {
+                closeDeleteConfirmation();
+                if (callback) callback();
+                // Ensure no double-listeners if called multiple times rapidly
+                cancelDeleteBtn.removeEventListener('click', tempCloseHandler); 
+                confirmDeleteBtn.removeEventListener('click', tempCloseHandler); 
+            };
+            cancelDeleteBtn.addEventListener('click', tempCloseHandler, { once: true }); // Use once: true to auto-remove
+            confirmDeleteBtn.addEventListener('click', tempCloseHandler, { once: true }); // Also for confirm in case it's used
         }
 
         // --- 4. Page Loaders ---
@@ -838,14 +837,23 @@
         async function loadHomePage() {
             renderPage(`
                 <h2><i class="fas fa-newspaper"></i> מאמרים אחרונים</h2>
+                <div id="search-bar-container">
+                    <input type="text" id="search-input" placeholder="חפש כתבה לפי כותרת או יוצר...">
+                    <button id="search-button"><i class="fas fa-search"></i> חיפוש</button>
+                </div>
                 <div id="articles-list">טוען מאמרים... <i class="fas fa-spinner fa-spin"></i></div>
             `);
+            document.getElementById('search-button').addEventListener('click', handleSearchArticles);
+            document.getElementById('search-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSearchArticles();
+                }
+            });
             await fetchAndDisplayArticles();
         }
 
         async function loadCreateArticlePage(articleIdToEdit = null) {
             if (!currentUser) {
-                // Using custom modal for messages now, not alert
                 showInfoModal('יש להתחבר כדי ליצור כתבה.', () => { window.location.hash = '#login'; });
                 return;
             }
@@ -855,7 +863,7 @@
             let initialTitle = '';
             let initialContent = '';
             currentEditingArticleId = articleIdToEdit;
-
+            
             if (articleIdToEdit) {
                 pageTitle = 'ערוך כתבה';
                 submitBtnText = 'עדכן כתבה';
@@ -865,17 +873,17 @@
                         const data = docSnap.data();
                         // Verify author matches current user for editing
                         if (data.authorId !== currentUser.uid) {
-                             showInfoModal('אין לך הרשאה לערוך כתבה זו.', () => { window.location.hash = '#my-account'; });
-                             currentEditingArticleId = null; // Clear editing state
-                             return;
+                            showInfoModal('אין לך הרשאה לערוך כתבה זו.', () => { window.location.hash = '#my-account'; });
+                            currentEditingArticleId = null; // Clear editing state
+                            return;
                         }
                         initialTitle = data.title;
                         initialContent = data.content;
                     } else {
-                         console.warn("Article for editing not found, switching to create mode.");
-                         articleIdToEdit = null;
-                         currentEditingArticleId = null;
-                         showMessage('error', 'הכתבה לעריכה לא נמצאה. עבר למצב יצירה חדשה.', 'create-article-message');
+                        console.warn("Article for editing not found, switching to create mode.");
+                        articleIdToEdit = null;
+                        currentEditingArticleId = null;
+                        showMessage('error', 'הכתבה לעריכה לא נמצאה. עבר למצב יצירה חדשה.', 'create-article-message');
                     }
                 } catch (error) {
                     console.error("שגיאה בטעינת הכתבה לעריכה:", error);
@@ -913,7 +921,7 @@
                     const publishDate = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString('he-IL', { dateStyle: 'medium' }) : 'תאריך לא ידוע';
                     const publishTime = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : 'שעה לא ידועה';
 
-                    let authorName = 'משתמש אנונימי';
+                    let authorName = data.authorEmail || 'משתמש אנונימי'; // Use authorEmail directly
                     if (data.authorId) {
                         const userDoc = await db.collection('users').doc(data.authorId).get();
                         if (userDoc.exists) {
@@ -958,7 +966,6 @@
 
         async function loadMyAccountPage() {
             if (!currentUser) {
-                // Using custom modal for messages now, not alert
                 showInfoModal('יש להתחבר כדי לגשת לדף החשבון שלי.', () => { window.location.hash = '#login'; });
                 return;
             }
@@ -1153,29 +1160,61 @@
             });
         }
 
-
         // --- 6. Articles Logic ---
 
-        async function fetchAndDisplayArticles() {
+        async function fetchAndDisplayArticles(searchTerm = '') {
             const articlesListDiv = document.getElementById('articles-list');
             articlesListDiv.innerHTML = 'טוען מאמרים... <i class="fas fa-spinner fa-spin"></i>';
 
             try {
-                // Query Firestore for articles, ordered by createdAt (newest first)
-                const querySnapshot = await db.collection('articles').orderBy('createdAt', 'desc').get();
-                const articles = [];
+                let query = db.collection('articles').orderBy('createdAt', 'desc');
+
+                // If there's a search term, filter the query
+                if (searchTerm) {
+                    // Normalize search term for case-insensitive search
+                    const searchLower = searchTerm.toLowerCase();
+                    // Firestore doesn't support complex 'OR' queries across multiple fields directly.
+                    // For client-side simple search, we fetch all and filter or query by prefix.
+                    // For production-grade search, consider dedicated search services (Algolia, ElasticSearch)
+                    // or more complex backend queries.
+                    // For now, we'll fetch all and filter on the client side for simplicity given the current structure.
+                    // If you need server-side searching for performance with large datasets, let me know.
+                    // Alternatively, we can make two separate queries if only prefix matching is acceptable for Firestore.
+                    
+                    // For now, let's assume filtering on client side after fetching all.
+                    // If the dataset is very large, this can be inefficient.
+                }
+                
+                const querySnapshot = await query.get();
+                let articles = [];
                 querySnapshot.forEach(doc => {
                     articles.push({ id: doc.id, ...doc.data() });
                 });
 
+                // Client-side filtering if search term exists
+                if (searchTerm) {
+                    const searchLower = searchTerm.toLowerCase();
+                    const userDocs = await db.collection('users').get();
+                    const usersMap = {};
+                    userDocs.forEach(doc => {
+                        usersMap[doc.id] = doc.data().fullName ? doc.data().fullName.toLowerCase() : '';
+                    });
+
+                    articles = articles.filter(article => {
+                        const titleLower = article.title ? article.title.toLowerCase() : '';
+                        const authorNameLower = usersMap[article.authorId] || (article.authorEmail ? article.authorEmail.toLowerCase() : '');
+                        
+                        return titleLower.includes(searchLower) || authorNameLower.includes(searchLower);
+                    });
+                }
+
                 if (articles.length === 0) {
-                    articlesListDiv.innerHTML = '<p style="text-align: center; color: #888; font-style: italic;">אין מאמרים עדיין. <br>היה הראשון לפרסם!</p>';
+                    articlesListDiv.innerHTML = '<p style="text-align: center; color: #888; font-style: italic;">אין מאמרים למציאה. <br>נסה חיפוש אחר או היה הראשון לפרסם!</p>';
                     return;
                 }
 
                 let articlesHtml = '';
                 articles.forEach((article, index) => {
-                    // Firebase Firestore stores timestamps as Timestamp objects, convert to Date
                     const articleDate = article.createdAt ? new Date(article.createdAt.toDate()).toLocaleDateString('he-IL') : 'תאריך לא ידוע';
                     articlesHtml += `
                         <div class="article-card" style="animation-delay: ${index * 0.1}s;">
@@ -1190,6 +1229,11 @@
                 console.error('שגיאה בטעינת המאמרים:', error);
                 articlesListDiv.innerHTML = '<p class="error-message">שגיאה בטעינת המאמרים. אנא וודא שהגדרת את האינדקסים ב-Firebase Firestore.</p>';
             }
+        }
+
+        async function handleSearchArticles() {
+            const searchTerm = document.getElementById('search-input').value.trim();
+            await fetchAndDisplayArticles(searchTerm);
         }
 
         async function fetchAndDisplayMyArticles() {
@@ -1271,7 +1315,7 @@
                     content: content,
                     authorId: currentUser.uid,
                     authorEmail: currentUser.email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp() // Use server timestamp
                 });
 
                 const articleLink = `#article-${newArticleRef.id}`;
@@ -1310,9 +1354,17 @@
             }
 
             try {
+                // Fetch the existing article to ensure the current user is the author
+                const docSnap = await db.collection('articles').doc(currentEditingArticleId).get();
+                if (!docSnap.exists || docSnap.data().authorId !== currentUser.uid) {
+                    showInfoModal('אין לך הרשאה לערוך כתבה זו.', () => { window.location.hash = '#my-account'; });
+                    return;
+                }
+
                 await db.collection('articles').doc(currentEditingArticleId).update({
                     title: title,
                     content: content
+                    // createdAt is not updated on edit, it remains the original creation time
                 });
 
                 const articleLink = `#article-${currentEditingArticleId}`;
@@ -1329,25 +1381,6 @@
 
         let articleIdToDelete = null; // Store ID for delete operation
 
-        // Custom modal to show info/error instead of native alert/confirm
-        function showInfoModal(message, callback = null) {
-            modalMessage.innerHTML = message;
-            confirmDeleteBtn.style.display = 'none'; // Hide confirm button
-            cancelDeleteBtn.textContent = 'סגור'; // Change cancel button to close
-            confirmationModal.style.display = 'flex'; // Show modal
-            
-            // Reattach event listener for close button to run callback if provided
-            const tempCloseHandler = () => {
-                closeDeleteConfirmation();
-                if (callback) callback();
-                // Ensure no double-listeners if called multiple times rapidly
-                cancelDeleteBtn.removeEventListener('click', tempCloseHandler); 
-                confirmDeleteBtn.removeEventListener('click', tempCloseHandler); 
-            };
-            cancelDeleteBtn.addEventListener('click', tempCloseHandler, { once: true }); // Use once: true to auto-remove
-            confirmDeleteBtn.addEventListener('click', tempCloseHandler, { once: true }); // Also for confirm in case it's used
-        }
-
         function showDeleteConfirmation(articleId, articleTitle) {
             articleIdToDelete = articleId;
             modalMessage.innerHTML = `האם אתה בטוח שברצונך למחוק את הכתבה "${articleTitle}"?`;
@@ -1363,6 +1396,14 @@
             }
 
             try {
+                // Verify ownership before deleting
+                const docSnap = await db.collection('articles').doc(articleIdToDelete).get();
+                if (!docSnap.exists || docSnap.data().authorId !== currentUser.uid) {
+                    showInfoModal('אין לך הרשאה למחוק כתבה זו.');
+                    closeDeleteConfirmation();
+                    return;
+                }
+
                 await db.collection('articles').doc(articleIdToDelete).delete();
                 showMessage('success', 'הכתבה נמחקה בהצלחה!', 'account-message');
                 closeDeleteConfirmation();
