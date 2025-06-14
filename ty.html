@@ -190,8 +190,7 @@
             transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
         }
 
-        /* Removed aggressive red border on initial load.
-           Instead, use .is-invalid class added by JS on submission or blur if required and invalid. */
+        /* ONLY apply red border if .is-invalid class is present */
         input.is-invalid, textarea.is-invalid {
             border-color: var(--error-color) !important; /* Red for validation errors */
         }
@@ -1018,7 +1017,15 @@
             const form = event.target;
             if (!form.checkValidity()) { // HTML5 form validation
                 form.reportValidity();
-                return;
+                // Add is-invalid class to empty required fields
+                form.querySelectorAll('input[required], textarea[required]').forEach(input => {
+                    if (!input.checkValidity()) {
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+                return; // Stop execution if form is invalid
             }
 
             const email = document.getElementById('signup-email').value;
@@ -1037,7 +1044,7 @@
                 });
 
                 showMessage('success', `ההרשמה הצליחה! אנא התחבר.`, 'signup-message');
-                // Firebase by default may send verification email, depends on config
+                form.querySelectorAll('.is-invalid').forEach(input => input.classList.remove('is-invalid')); // Clear invalid state
                 setTimeout(() => { window.location.hash = '#login'; }, 1500);
 
             } catch (error) {
@@ -1050,7 +1057,14 @@
             const form = event.target;
             if (!form.checkValidity()) { // HTML5 form validation
                 form.reportValidity();
-                return;
+                form.querySelectorAll('input[required], textarea[required]').forEach(input => {
+                    if (!input.checkValidity()) {
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+                return; // Stop execution if form is invalid
             }
 
             const email = document.getElementById('login-email').value;
@@ -1058,8 +1072,10 @@
 
             try {
                 await auth.signInWithEmailAndPassword(email, password);
-                // Auth state observer will update currentUser and UI
-                window.location.hash = ''; // Go to home page
+                showMessage('success', 'התחברת בהצלחה!', 'login-message'); // Show success message
+                form.querySelectorAll('.is-invalid').forEach(input => input.classList.remove('is-invalid')); // Clear invalid state
+                setTimeout(() => { window.location.hash = ''; }, 1000); // Redirect to home after 1 second
+
             } catch (error) {
                 showMessage('error', `שגיאת התחברות: ${error.message}`, 'login-message');
             }
@@ -1068,7 +1084,6 @@
         async function handleLogout() {
             try {
                 await auth.signOut();
-                // Auth state observer will update currentUser and UI
                 window.location.hash = ''; // Go to home page (will reload as logged out)
             } catch (error) {
                 console.error('שגיאת התנתקות:', error);
@@ -1080,7 +1095,14 @@
             const form = event.target;
             if (!form.checkValidity()) { // HTML5 form validation
                 form.reportValidity();
-                return;
+                form.querySelectorAll('input[required], textarea[required]').forEach(input => {
+                    if (!input.checkValidity()) {
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+                return; // Stop execution if form is invalid
             }
 
             if (!currentUser) return;
@@ -1091,11 +1113,11 @@
                     fullName: newFullName
                 });
                 showMessage('success', 'השם המלא עודכן בהצלחה!', 'account-message');
-                // Refresh the display without reloading the whole page
                 document.getElementById('display-full-name').textContent = newFullName;
                 document.getElementById('edit-full-name-form').style.display = 'none';
                 document.getElementById('display-full-name').style.display = 'inline';
                 document.getElementById('edit-full-name-btn').style.display = 'inline';
+                form.querySelectorAll('.is-invalid').forEach(input => input.classList.remove('is-invalid')); // Clear invalid state
             } catch (error) {
                 showMessage('error', `שגיאה בעדכון השם: ${error.message}`, 'account-message');
                 console.error("שגיאה בעדכון שם מלא:", error);
@@ -1119,6 +1141,7 @@
                 });
             });
 
+            // This ensures validation classes are applied on initial submit attempt
             form.addEventListener('submit', () => {
                 form.querySelectorAll('input[required], textarea[required]').forEach(input => {
                     if (!input.checkValidity()) {
@@ -1220,9 +1243,10 @@
         async function handleCreateArticle(event) {
             event.preventDefault();
             const form = event.target;
-            if (!form.checkValidity()) { // HTML5 form validation
+            // Trigger HTML5 validation (shows native bubbles and sets :invalid CSS)
+            if (!form.checkValidity()) { 
                 form.reportValidity();
-                // Add is-invalid class to empty required fields
+                // Additionally, manually apply our .is-invalid class for consistent styling
                 form.querySelectorAll('input[required], textarea[required]').forEach(input => {
                     if (!input.checkValidity()) {
                         input.classList.add('is-invalid');
@@ -1230,8 +1254,7 @@
                         input.classList.remove('is-invalid');
                     }
                 });
-                showMessage('error', 'אנא מלא את כל השדות הנדרשים.', 'create-article-message');
-                return;
+                return; // Stop execution if form is invalid
             }
 
             const title = document.getElementById('article-title').value;
@@ -1259,7 +1282,7 @@
                 setTimeout(() => { window.location.hash = articleLink; }, 2000);
 
             } catch (error) {
-                showMessage('error', `שגיאה ביצירת הכתבה: ${error.message}`, 'create-article-message');
+                showMessage('error', `שגיאה ביצירת הכתבה: ${error.message}. וודא שהגדרת את כללי האבטחה ב-Firebase Firestore.`);
             }
         }
 
@@ -1268,7 +1291,6 @@
             const form = event.target;
             if (!form.checkValidity()) { // HTML5 form validation
                 form.reportValidity();
-                // Add is-invalid class to empty required fields
                 form.querySelectorAll('input[required], textarea[required]').forEach(input => {
                     if (!input.checkValidity()) {
                         input.classList.add('is-invalid');
@@ -1276,8 +1298,7 @@
                         input.classList.remove('is-invalid');
                     }
                 });
-                showMessage('error', 'אנא מלא את כל השדות הנדרשים.', 'create-article-message');
-                return;
+                return; // Stop execution if form is invalid
             }
 
             const title = document.getElementById('article-title').value;
@@ -1302,8 +1323,7 @@
                 setTimeout(() => { window.location.hash = articleLink; }, 2000);
 
             } catch (error) {
-                showMessage('error', `שגיאה בעדכון הכתבה: ${error.message}`, 'create-article-message');
-                console.error("שגיאה בעדכון כתבה:", error);
+                showMessage('error', `שגיאה בעדכון הכתבה: ${error.message}. וודא שהגדרת את כללי האבטחה ב-Firebase Firestore.`);
             }
         }
 
@@ -1320,12 +1340,12 @@
             const tempCloseHandler = () => {
                 closeDeleteConfirmation();
                 if (callback) callback();
-                cancelDeleteBtn.removeEventListener('click', tempCloseHandler); // Remove self
-                confirmDeleteBtn.removeEventListener('click', tempCloseHandler); // Just in case
+                // Ensure no double-listeners if called multiple times rapidly
+                cancelDeleteBtn.removeEventListener('click', tempCloseHandler); 
+                confirmDeleteBtn.removeEventListener('click', tempCloseHandler); 
             };
-            cancelDeleteBtn.addEventListener('click', tempCloseHandler);
-            // If there's no specific action needed other than closing, this is fine
-            // Otherwise, make sure confirm button is hidden correctly and doesn't trigger unexpected behavior
+            cancelDeleteBtn.addEventListener('click', tempCloseHandler, { once: true }); // Use once: true to auto-remove
+            confirmDeleteBtn.addEventListener('click', tempCloseHandler, { once: true }); // Also for confirm in case it's used
         }
 
         function showDeleteConfirmation(articleId, articleTitle) {
@@ -1348,7 +1368,7 @@
                 closeDeleteConfirmation();
                 await fetchAndDisplayMyArticles(); // Refresh my articles list
             } catch (error) {
-                showMessage('error', `שגיאה במחיקת הכתבה: ${error.message}`, 'account-message');
+                showMessage('error', `שגיאה במחיקת הכתבה: ${error.message}. וודא שהגדרת את כללי האבטחה ב-Firebase Firestore.`);
                 console.error("שגיאה במחיקת כתבה:", error);
                 closeDeleteConfirmation();
             }
