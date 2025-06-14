@@ -6,7 +6,7 @@
     <title>NewsE - פאנל ניהול</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* admin.css combined */
+        /* CSS Combined */
         :root {
             --primary-color: #2c3e50; /* Dark Blue for Admin */
             --secondary-color: #3498db; /* Regular Blue */
@@ -21,6 +21,7 @@
             --warning-color: #f39c12;
             --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
             --border-radius: 8px;
+            --button-padding: 12px 20px;
         }
 
         * {
@@ -36,9 +37,12 @@
             line-height: 1.6;
             direction: rtl; /* Right-to-left for Hebrew */
             text-align: right;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        #loading-screen {
+        #loading-screen, #access-denied-page, #admin-login-page {
             position: fixed;
             top: 0;
             left: 0;
@@ -52,9 +56,11 @@
             font-size: 1.5em;
             color: var(--primary-color);
             z-index: 1000;
+            text-align: center;
+            padding: 20px;
         }
 
-        #loading-screen img {
+        #loading-screen img, #access-denied-page img, #admin-login-page img {
             width: 100px;
             height: 100px;
             margin-bottom: 20px;
@@ -64,6 +70,45 @@
         @keyframes bounce {
             from { transform: translateY(0); }
             to { transform: translateY(-10px); }
+        }
+
+        #access-denied-page .message-card, #admin-login-page .message-card {
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        #access-denied-page h2, #admin-login-page h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        #access-denied-page p, #admin-login-page p {
+            font-size: 1.1em;
+            color: var(--light-text-color);
+            margin-bottom: 25px;
+        }
+
+        #admin-login-page form {
+            margin-top: 20px;
+            gap: 20px;
+        }
+        #admin-login-page input[type="password"] {
+            margin-bottom: 20px;
+        }
+
+        #admin-login-page .link-to-add-admin {
+            margin-top: 25px;
+            font-size: 0.95em;
+            color: var(--secondary-color);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        #admin-login-page .link-to-add-admin:hover {
+            color: var(--hover-color);
         }
 
         #admin-header {
@@ -77,6 +122,7 @@
             position: sticky;
             top: 0;
             z-index: 500;
+            flex-shrink: 0;
         }
 
         #admin-header .logo-container {
@@ -127,7 +173,7 @@
 
         .admin-container {
             display: flex;
-            min-height: calc(100vh - 80px); /* Adjust based on header height */
+            flex-grow: 1; /* Allows it to take remaining vertical space */
         }
 
         #admin-sidebar {
@@ -163,6 +209,7 @@
             flex-grow: 1;
             padding: 25px;
             background-color: var(--background-color);
+            overflow-y: auto; /* Enable scrolling for content */
         }
 
         .admin-page-title {
@@ -190,7 +237,13 @@
             margin-bottom: 30px;
         }
 
-        form input[type="email"],
+        form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
         form input[type="password"],
         form input[type="text"],
         form textarea {
@@ -213,7 +266,7 @@
         form button {
             background-color: var(--secondary-color);
             color: white;
-            padding: 12px 20px;
+            padding: var(--button-padding);
             border: none;
             border-radius: var(--border-radius);
             font-size: 1.1em;
@@ -228,36 +281,6 @@
         form button:hover {
             background-color: #2980b9;
             transform: translateY(-2px);
-        }
-
-        /* Specific to login page */
-        #login-page {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: var(--background-color);
-        }
-
-        #login-container {
-            background-color: var(--card-background);
-            padding: 40px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        #login-container h2 {
-            color: var(--primary-color);
-            margin-bottom: 30px;
-            font-size: 2em;
-        }
-
-        #login-container form {
-            margin-top: 20px;
-            gap: 20px;
         }
 
         .message {
@@ -280,6 +303,12 @@
             border: 1px solid var(--success-color);
         }
 
+        .warning-message {
+            background-color: #ffeccf;
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+
         /* Tables styling */
         .admin-table {
             width: 100%;
@@ -295,6 +324,7 @@
             padding: 12px 15px;
             border: 1px solid var(--border-color);
             text-align: right;
+            vertical-align: middle;
         }
 
         .admin-table th {
@@ -347,6 +377,13 @@
             border: none;
         }
         .admin-table .view-btn:hover { background-color: var(--hover-color); }
+
+        .admin-table .action-btn {
+            background-color: var(--warning-color); /* Default for actions like suspend/activate */
+            color: white;
+            border: none;
+        }
+        .admin-table .action-btn:hover { background-color: #d18d0f; }
 
         .admin-search-bar {
             display: flex;
@@ -453,7 +490,6 @@
             background-color: #aeb6be;
             transform: translateY(-1px);
         }
-
 
         /* Admin specific pages */
         #admin-dashboard h3 {
@@ -597,6 +633,9 @@
                 padding: 6px 8px;
                 font-size: 0.8em;
             }
+            #access-denied-page .message-card, #admin-login-page .message-card {
+                padding: 25px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -635,13 +674,55 @@
         טוען פאנל ניהול...
     </div>
 
+    <div id="access-denied-page" style="display: none;">
+        <div class="message-card">
+            <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="NewsE Logo">
+            <h2><i class="fas fa-lock"></i> הגישה נחסמה</h2>
+            <p>אין לך גישה ישירה לעמוד זה. אנא הזן את שם המנהל בכתובת ה-URL.</p>
+            <p style="font-size: 0.9em; color: var(--light-text-color);">
+                לדוגמה: <code>https://nnewsee.netlify.app/admin.html#admin/<span style="color:var(--secondary-color); font-weight:bold;">שם-המנהל-שלך</span></code>
+            </p>
+            <p style="margin-top: 20px;">
+                <button id="add-first-admin-btn" style="background-color: var(--secondary-color); color: white; padding: 10px 20px; border: none; border-radius: var(--border-radius); cursor: pointer;"><i class="fas fa-user-plus"></i> הוסף מנהל ראשון</button>
+            </p>
+        </div>
+    </div>
+
+    <div id="admin-login-page" style="display: none;">
+        <div class="message-card">
+            <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="NewsE Logo">
+            <h2><i class="fas fa-user-shield"></i> התחברות ל-"NewsE Admin"</h2>
+            <p id="current-admin-user-display"></p>
+            <div id="admin-login-message" class="error-message" style="display: none;"></div>
+            <form id="admin-login-form">
+                <input type="password" id="admin-password" placeholder="סיסמה" required>
+                <button type="submit"><i class="fas fa-sign-in-alt"></i> התחבר</button>
+            </form>
+            <p class="link-to-add-admin" id="show-add-admin-link" style="display: none;">
+                <a href="javascript:void(0);" onclick="showAdminCreationForm()">הוסף משתמש מנהל חדש</a>
+            </p>
+
+            <form id="add-new-admin-form" style="display: none; margin-top: 30px;">
+                <h3><i class="fas fa-user-plus"></i> הוסף מנהל חדש</h3>
+                <p style="font-size: 0.9em; color: var(--light-text-color); margin-bottom: 10px;">
+                    צור משתמש מנהל חדש וסיסמה ייעודית.
+                </p>
+                <input type="text" id="new-admin-username" placeholder="שם משתמש למנהל (יופיע ב-URL)" required>
+                <input type="password" id="new-admin-password" placeholder="סיסמה למנהל" required>
+                <input type="password" id="new-admin-password-confirm" placeholder="אשר סיסמה" required>
+                <button type="submit"><i class="fas fa-user-plus"></i> צור מנהל</button>
+                <button type="button" onclick="hideAdminCreationForm()" style="background-color: #ccc; color: var(--text-color); margin-top: 10px;"><i class="fas fa-times"></i> בטל</button>
+            </form>
+        </div>
+    </div>
+
     <header id="admin-header" style="display: none;">
         <div class="logo-container">
             <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="NewsE Logo">
             <h1>NewsE Admin</h1>
         </div>
         <div class="admin-info">
-            <span id="admin-display-name"></span>
+            <span id="admin-display-name">NewsE Admin</span>
             <button id="admin-logout-btn"><i class="fas fa-sign-out-alt"></i> התנתק</button>
         </div>
     </header>
@@ -669,31 +750,30 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script>
-        // admin.js combined
-        // 1. Firebase Configuration and Initialization
+        // --- Firebase Configuration and Initialization ---
         const firebaseConfig = {
             apiKey: "AIzaSyBr4kDzw3n5PDu2pbZ3MItnCxi8YJFCRIQ", // <-- החלף במפתח ה-API שלך
-            authDomain: "schoolmangers.firebaseapp.com", // <-- החלף במזהה הפרויקט שלך
-            projectId: "schoolmangers", // <-- החלף במזהה הפרויקט שלך
+            authDomain: "schoolmangers.firebaseapp.com",     // <-- החלף במזהה הפרויקט שלך
+            projectId: "schoolmangers",                     // <-- החלף במזהה הפרויקט שלך
             storageBucket: "schoolmangers.firebasestorage.app", // <-- החלף במזהה הפרויקט שלך
-            messagingSenderId: "894509181268", // <-- החלף במזהה השולח שלך
+            messagingSenderId: "894509181268",             // <-- החלף במזהה השולח שלך
             appId: "1:894509181268:web:c8ac6305f23fa003e3c0c1", // <-- החלף במזהה האפליקציה שלך
-            measurementId: "G-BE0R2WQ35J" // אופציונלי, עבור אנליטיקס
+            measurementId: "G-BE0R2WQ35J"                 // אופציונלי, עבור אנליטיקס
         };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth(); // Added for authentication
         const firestore = firebase.firestore();
 
-        // 2. DOM Elements
+        // --- DOM Elements ---
         const loadingScreen = document.getElementById('loading-screen');
+        const accessDeniedPage = document.getElementById('access-denied-page');
+        const adminLoginPage = document.getElementById('admin-login-page');
         const adminHeader = document.getElementById('admin-header');
         const adminContainer = document.querySelector('.admin-container');
-        const adminDisplayName = document.getElementById('admin-display-name');
+        const adminDisplayName = document.getElementById('admin-display-name'); // This will display "NewsE Admin"
         const adminLogoutBtn = document.getElementById('admin-logout-btn');
         const adminSidebar = document.getElementById('admin-sidebar');
         const adminContent = document.getElementById('admin-content');
@@ -702,10 +782,30 @@
         const adminConfirmActionBtn = document.getElementById('admin-confirm-action-btn');
         const adminCancelActionBtn = document.getElementById('admin-cancel-action-btn');
 
-        let currentAdminUser = null; // Stores the logged-in admin user's details
+        let currentAdminUserHash = null; // Stores the 'adminuser' from the URL hash
+        const ADMIN_DISPLAY_NAME_FIXED = "NewsE Admin"; // The fixed display name for all admins
 
         // --- Helper Functions ---
-        function renderAdminPage(htmlContent) {
+        function renderPage(targetPage) {
+            loadingScreen.style.display = 'none';
+            accessDeniedPage.style.display = 'none';
+            adminLoginPage.style.display = 'none';
+            adminHeader.style.display = 'none';
+            adminContainer.style.display = 'none';
+
+            if (targetPage === 'loading') {
+                loadingScreen.style.display = 'flex';
+            } else if (targetPage === 'accessDenied') {
+                accessDeniedPage.style.display = 'flex';
+            } else if (targetPage === 'login') {
+                adminLoginPage.style.display = 'flex';
+            } else if (targetPage === 'mainAdminPanel') {
+                adminHeader.style.display = 'flex';
+                adminContainer.style.display = 'flex';
+            }
+        }
+
+        function renderAdminContent(htmlContent) {
             adminContent.innerHTML = htmlContent;
             const hash = window.location.hash.split('?')[0];
             document.querySelectorAll('.sidebar-item').forEach(item => {
@@ -717,7 +817,7 @@
             });
         }
 
-        function showAdminMessage(type, message, targetElementId) {
+        function showMessage(type, message, targetElementId) {
             const target = document.getElementById(targetElementId);
             if (!target) return;
             target.innerHTML = `<div class="${type}-message">${message}</div>`;
@@ -747,105 +847,174 @@
             adminConfirmationModal.style.display = 'flex';
         }
 
+        function base64Encode(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function base64Decode(str) {
+            return decodeURIComponent(escape(atob(str)));
+        }
+
         // --- Admin Authentication Logic ---
-        async function checkAdminLoginState() {
-            loadingScreen.style.display = 'flex';
-            adminHeader.style.display = 'none';
-            adminContainer.style.display = 'none';
+        async function checkAdminAccess() {
+            renderPage('loading');
+            const fullHash = window.location.hash; // e.g., #admin/AmitMatyas?param=value
+            const hashParts = fullHash.split('/');
 
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    // User is signed in, check if they are an admin
-                    try {
-                        const adminDoc = await firestore.collection('admins').doc(user.uid).get();
-                        if (adminDoc.exists) {
-                            currentAdminUser = {
-                                uid: user.uid,
-                                email: user.email,
-                                displayName: adminDoc.data().displayName || user.email // Use custom display name or email
-                            };
-                            adminDisplayName.textContent = currentAdminUser.displayName;
-                            adminHeader.style.display = 'flex';
-                            adminContainer.style.display = 'flex';
-                            handleAdminHashChange(); // Load the correct page based on hash
-                        } else {
-                            // User is authenticated but not marked as admin in Firestore
-                            await auth.signOut(); // Force sign out
-                            renderLoginPage('אין לך הרשאות מנהל. התחבר עם חשבון מנהל.');
-                        }
-                    } catch (error) {
-                        console.error("Error checking admin status:", error);
-                        await auth.signOut();
-                        renderLoginPage('שגיאה בבדיקת הרשאות. נסה שוב.');
-                    }
-                } else {
-                    // No user is signed in
-                    currentAdminUser = null;
-                    renderLoginPage();
-                }
-                loadingScreen.style.display = 'none';
-            });
-        }
+            if (hashParts.length === 2 && hashParts[0] === '#admin') {
+                const adminUserFromHash = hashParts[1].split('?')[0]; // Get 'AmitMatyas' from '#admin/AmitMatyas?x=y'
+                currentAdminUserHash = adminUserFromHash; // Store the admin username from the URL
 
-        function renderLoginPage(message = '') {
-            renderAdminPage(`
-                <div id="login-page">
-                    <div id="login-container">
-                        <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="NewsE Logo" style="width: 80px; margin-bottom: 20px;">
-                        <h2>התחברות למנהל</h2>
-                        <div id="admin-login-message" class="${message ? 'error-message' : ''}" style="${message ? 'display: block;' : 'display: none;'}">${message}</div>
-                        <form id="admin-login-form">
-                            <input type="email" id="admin-email" placeholder="אימייל מנהל" required>
-                            <input type="password" id="admin-password" placeholder="סיסמה" required>
-                            <button type="submit"><i class="fas fa-sign-in-alt"></i> התחבר</button>
-                        </form>
-                        <p style="margin-top: 20px; font-size: 0.9em; color: var(--light-text-color);">
-                            אם אין לך חשבון מנהל, צור אחד ב-Firebase Authentication וסמן אותו כ"מנהל" בקולקציית admins ב-Firestore.
-                        </p>
-                    </div>
-                </div>
-            `);
-
-            document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('admin-email').value;
-                const password = document.getElementById('admin-password').value;
-                const loginMessageDiv = document.getElementById('admin-login-message');
-                loginMessageDiv.style.display = 'none';
-
+                // Render login page for this admin user
+                renderPage('login');
+                document.getElementById('current-admin-user-display').textContent = `הזן סיסמה עבור ${ADMIN_DISPLAY_NAME_FIXED} (${currentAdminUserHash})`;
+                
+                // Check if there are any admins in the database. If not, show "Add Admin" link.
                 try {
-                    await auth.signInWithEmailAndPassword(email, password);
-                    // onAuthStateChanged listener will handle redirection upon successful sign-in
-                } catch (error) {
-                    let errorMessage = 'שגיאת התחברות.';
-                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                        errorMessage = 'אימייל או סיסמה שגויים.';
-                    } else if (error.code === 'auth/too-many-requests') {
-                        errorMessage = 'נסיונות התחברות רבים מדי. נסה שוב מאוחר יותר.';
+                    const adminsSnapshot = await firestore.collection('admins').get();
+                    if (adminsSnapshot.empty) {
+                        document.getElementById('show-add-admin-link').style.display = 'block';
                     } else {
-                        errorMessage = `שגיאה: ${error.message}`;
+                        document.getElementById('show-add-admin-link').style.display = 'none';
                     }
-                    showAdminMessage('error', errorMessage, 'admin-login-message');
+                } catch (error) {
+                    console.error("Error checking admin count:", error);
+                    // Fail gracefully, maybe assume there are admins
                 }
-            });
-        }
 
-        async function adminLogout() {
-            try {
-                await auth.signOut();
-                currentAdminUser = null;
-                // onAuthStateChanged will redirect to login page
-            } catch (error) {
-                console.error("Error logging out:", error);
-                showAdminMessage('error', 'שגיאה בהתנתקות.', 'admin-login-message'); // This message won't be visible immediately
+            } else {
+                // If hash is not in '#admin/user' format (e.g., '', '#dashboard', or malformed)
+                renderPage('accessDenied');
+                document.getElementById('add-first-admin-btn').onclick = () => {
+                    window.location.hash = '#admin/initialSetup'; // Redirect to a placeholder hash for first admin setup
+                    checkAdminAccess(); // Re-run check to show login form for initial setup
+                };
             }
         }
+
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            const passwordInput = document.getElementById('admin-password');
+            const password = passwordInput.value;
+            const loginMessageDiv = document.getElementById('admin-login-message');
+            loginMessageDiv.style.display = 'none';
+
+            if (!currentAdminUserHash) {
+                showMessage('error', 'שגיאה: שם מנהל לא זוהה מהכתובת.', 'admin-login-message');
+                return;
+            }
+
+            try {
+                const adminDoc = await firestore.collection('admins').doc(currentAdminUserHash).get();
+
+                if (!adminDoc.exists) {
+                    showMessage('error', 'שם מנהל לא קיים. וודא שהזנת את השם הנכון בכתובת ה-URL.', 'admin-login-message');
+                    return;
+                }
+
+                const storedPasswordHash = adminDoc.data().passwordHash;
+                const hashedPasswordInput = base64Encode(password); // Hash the input password
+
+                if (hashedPasswordInput === storedPasswordHash) {
+                    // Login successful
+                    sessionStorage.setItem('loggedInAdminUser', currentAdminUserHash);
+                    sessionStorage.setItem('isAdminLoggedIn', 'true');
+                    renderPage('mainAdminPanel');
+                    handleAdminHashChange(); // Load the correct admin panel page
+                } else {
+                    showMessage('error', 'סיסמה שגויה. נסה שוב.', 'admin-login-message');
+                }
+            } catch (error) {
+                console.error("Error during admin login:", error);
+                showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-login-message');
+            }
+        }
+
+        function adminLogout() {
+            sessionStorage.removeItem('loggedInAdminUser');
+            sessionStorage.removeItem('isAdminLoggedIn');
+            currentAdminUserHash = null;
+            window.location.hash = ''; // Go back to base URL, will trigger access denied
+            checkAdminAccess();
+        }
+
+        function showAdminCreationForm() {
+            document.getElementById('admin-login-form').style.display = 'none';
+            document.getElementById('show-add-admin-link').style.display = 'none';
+            document.getElementById('add-new-admin-form').style.display = 'block';
+            showMessage('warning', 'צור את המנהל הראשון שלך. זכור את שם המשתמש והסיסמה.', 'admin-login-message');
+            // Clear any previous error messages
+            document.getElementById('admin-login-message').style.display = 'none';
+        }
+
+        function hideAdminCreationForm() {
+            document.getElementById('admin-login-form').style.display = 'block';
+            document.getElementById('show-add-admin-link').style.display = 'block'; // Or hide if admins exist
+            document.getElementById('add-new-admin-form').style.display = 'none';
+            document.getElementById('admin-login-message').style.display = 'none'; // Clear message
+        }
+
+        async function handleAddNewAdmin(event) {
+            event.preventDefault();
+            const usernameInput = document.getElementById('new-admin-username');
+            const passwordInput = document.getElementById('new-admin-password');
+            const confirmPasswordInput = document.getElementById('new-admin-password-confirm');
+            const loginMessageDiv = document.getElementById('admin-login-message');
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            loginMessageDiv.style.display = 'none';
+
+            if (!username) {
+                showMessage('error', 'אנא הזן שם משתמש למנהל.', 'admin-login-message');
+                return;
+            }
+            if (password.length < 6) {
+                showMessage('error', 'הסיסמה חייבת להיות באורך 6 תווים לפחות.', 'admin-login-message');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showMessage('error', 'הסיסמאות אינן תואמות.', 'admin-login-message');
+                return;
+            }
+
+            try {
+                const adminDoc = await firestore.collection('admins').doc(username).get();
+                if (adminDoc.exists) {
+                    showMessage('error', `שם המשתמש "${username}" כבר קיים. אנא בחר שם אחר.`, 'admin-login-message');
+                    return;
+                }
+
+                await firestore.collection('admins').doc(username).set({
+                    passwordHash: base64Encode(password),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showMessage('success', `מנהל "${username}" נוצר בהצלחה!`, 'admin-login-message');
+                usernameInput.value = '';
+                passwordInput.value = '';
+                confirmPasswordInput.value = '';
+                hideAdminCreationForm();
+                // After creating, redirect to the new admin's login page
+                window.location.hash = `#admin/${username}`;
+                currentAdminUserHash = username; // Update current hash
+                document.getElementById('current-admin-user-display').textContent = `הזן סיסמה עבור ${ADMIN_DISPLAY_NAME_FIXED} (${currentAdminUserHash})`;
+                document.getElementById('show-add-admin-link').style.display = 'none'; // Hide if an admin now exists
+
+            } catch (error) {
+                console.error("שגיאה ביצירת מנהל חדש:", error);
+                showMessage('error', `שגיאה ביצירת מנהל: ${error.message}.`, 'admin-login-message');
+            }
+        }
+
 
         // --- Admin Page Loaders ---
 
         async function loadDashboard() {
-            if (!currentAdminUser) return renderLoginPage(); // Ensure user is logged in
-            renderAdminPage(`
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
                 <h2 class="admin-page-title"><i class="fas fa-tachometer-alt"></i> לוח בקרה</h2>
                 <div id="dashboard-message"></div>
                 <div class="dashboard-stats">
@@ -862,7 +1031,7 @@
                     <div class="stat-card">
                         <div class="icon"><i class="fas fa-pen-nib"></i></div>
                         <div class="value" id="admin-articles-stat">0</div>
-                        <div class="label">כתבות מערכת</div>
+                        <div class="label">כתבות מערכת NewsE</div>
                     </div>
                 </div>
             `);
@@ -876,18 +1045,18 @@
                 document.getElementById('total-articles-stat').textContent = articlesSnapshot.size;
                 document.getElementById('total-users-stat').textContent = usersSnapshot.size;
 
-                const adminArticles = articlesSnapshot.docs.filter(doc => doc.data().authorId === currentAdminUser.uid);
+                const adminArticles = articlesSnapshot.docs.filter(doc => doc.data().authorName === "מערכת NewsE");
                 document.getElementById('admin-articles-stat').textContent = adminArticles.length;
 
             } catch (error) {
                 console.error("Error fetching dashboard stats:", error);
-                showAdminMessage('error', 'שגיאה בטעינת נתוני לוח הבקרה.', 'dashboard-message');
+                showMessage('error', 'שגיאה בטעינת נתוני לוח הבקרה.', 'dashboard-message');
             }
         }
 
         async function loadManageArticlesPage(searchTerm = '') {
-            if (!currentAdminUser) return renderLoginPage();
-            renderAdminPage(`
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
                 <h2 class="admin-page-title"><i class="fas fa-newspaper"></i> ניהול כתבות</h2>
                 <div id="manage-articles-message"></div>
                 <div class="admin-search-bar">
@@ -927,11 +1096,11 @@
                     const searchLower = searchTerm.toLowerCase();
                     articles = articles.filter(article => {
                         const titleLower = (article.title || '').toLowerCase();
-                        const authorName = usersMap[article.authorId] || (article.authorEmail || 'משתמש לא ידוע').toLowerCase();
+                        const authorName = (article.authorName || (usersMap[article.authorId] || 'משתמש לא ידוע')).toLowerCase();
                         const articleIdLower = article.id.toLowerCase();
 
                         return titleLower.includes(searchLower) ||
-                               authorName.toLowerCase().includes(searchLower) ||
+                               authorName.includes(searchLower) ||
                                articleIdLower.includes(searchLower);
                     });
                 }
@@ -955,7 +1124,7 @@
                         <tbody>
                 `;
                 articles.forEach(article => {
-                    const authorDisplayName = usersMap[article.authorId] || (article.authorEmail || 'משתמש לא ידוע');
+                    const authorDisplayName = article.authorName || usersMap[article.authorId] || 'משתמש לא ידוע';
                     const createdAt = article.createdAt ? new Date(article.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
                     tableHtml += `
                         <tr>
@@ -977,17 +1146,16 @@
             } catch (error) {
                 console.error('שגיאה בטעינת כתבות לניהול:', error);
                 articlesTableContainer.innerHTML = '<p class="error-message">שגיאה בטעינת כתבות.</p>';
-                showAdminMessage('error', 'שגיאה בטעינת כתבות.', 'manage-articles-message');
+                showMessage('error', 'שגיאה בטעינת כתבות.', 'manage-articles-message');
             }
         }
 
         async function loadCreateArticleAdminPage(articleIdToEdit = null) {
-            if (!currentAdminUser) return renderLoginPage();
-            let pageTitle = 'צור כתבה חדשה (מערכת)';
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            let pageTitle = 'צור כתבה חדשה (מערכת NewsE)';
             let submitBtnText = 'פרסם כתבה';
             let initialTitle = '';
             let initialContent = '';
-            let currentArticleAuthorId = currentAdminUser.uid; // Default for admin-created articles
 
             window.adminEditingArticleId = articleIdToEdit;
 
@@ -1000,26 +1168,24 @@
                         const data = docSnap.data();
                         initialTitle = data.title;
                         initialContent = data.content;
-                        currentArticleAuthorId = data.authorId;
                     } else {
                         console.warn("Article for editing not found, switching to create mode.");
                         articleIdToEdit = null;
                         window.adminEditingArticleId = null;
-                        showAdminMessage('error', 'הכתבה לעריכה לא נמצאה. עבר למצב יצירה חדשה.', 'admin-create-article-message');
+                        showMessage('error', 'הכתבה לעריכה לא נמצאה. עבר למצב יצירה חדשה.', 'admin-create-article-message');
                     }
                 } catch (error) {
                     console.error("שגיאה בטעינת הכתבה לעריכה:", error);
-                    showAdminMessage('error', 'שגיאה בטעינת הכתבה לעריכה.', 'admin-create-article-message');
+                    showMessage('error', 'שגיאה בטעינת הכתבה לעריכה.', 'admin-create-article-message');
                     articleIdToEdit = null;
                     window.adminEditingArticleId = null;
                 }
             }
 
-            renderAdminPage(`
+            renderAdminContent(`
                 <h2 class="admin-page-title"><i class="fas fa-pen-nib"></i> ${pageTitle}</h2>
                 <div id="admin-create-article-message"></div>
                 <form id="admin-create-article-form">
-                    <input type="hidden" id="article-author-id" value="${currentArticleAuthorId}">
                     <input type="text" id="admin-article-title" placeholder="כותרת הכתבה" value="${initialTitle}" required>
                     <textarea id="admin-article-content" placeholder="תוכן הכתבה" rows="15" required>${initialContent}</textarea>
                     <button type="submit"><i class="fas fa-paper-plane"></i> ${submitBtnText}</button>
@@ -1038,8 +1204,8 @@
         }
 
         async function loadManageUsersPage(searchTerm = '') {
-            if (!currentAdminUser) return renderLoginPage();
-            renderAdminPage(`
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
                 <h2 class="admin-page-title"><i class="fas fa-users-cog"></i> ניהול משתמשים</h2>
                 <div id="manage-users-message"></div>
                 <div class="admin-search-bar">
@@ -1124,13 +1290,13 @@
             } catch (error) {
                 console.error('שגיאה בטעינת משתמשים לניהול:', error);
                 usersTableContainer.innerHTML = '<p class="error-message">שגיאה בטעינת משתמשים.</p>';
-                showAdminMessage('error', 'שגיאה בטעינת משתמשים.', 'manage-users-message');
+                showMessage('error', 'שגיאה בטעינת משתמשים.', 'manage-users-message');
             }
         }
 
         async function loadSingleArticleAdminPage(articleId) {
-            if (!currentAdminUser) return renderLoginPage();
-            renderAdminPage(`
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
                 <h2 class="admin-page-title"><i class="fas fa-file-alt"></i> ניהול כתבה</h2>
                 <div id="single-article-admin-message"></div>
                 <div id="admin-single-article">טוען פרטי כתבה... <i class="fas fa-spinner fa-spin"></i></div>
@@ -1146,13 +1312,14 @@
                     const publishDate = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString('he-IL', { dateStyle: 'medium' }) : 'תאריך לא ידוע';
                     const publishTime = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : 'שעה לא ידועה';
 
-                    let authorName = data.authorEmail || 'משתמש אנונימי';
-                    if (data.authorId === currentAdminUser.uid) { // Use current admin's UID
-                        authorName = `${currentAdminUser.displayName} (מנהל)`;
-                    } else if (data.authorId) {
+                    let authorDisplayName = data.authorName || 'משתמש לא ידוע';
+                    let authorLinkHtml = `<span style="color: var(--light-text-color);">${authorDisplayName}</span>`;
+
+                    if (data.authorId) { // Check if authorId exists (for regular users)
                         const userDoc = await firestore.collection('users').doc(data.authorId).get();
                         if (userDoc.exists) {
-                            authorName = userDoc.data().fullName || userDoc.data().email || 'משתמש לא ידוע';
+                            authorDisplayName = userDoc.data().fullName || userDoc.data().email || 'משתמש לא ידוע';
+                            authorLinkHtml = `<a href="#single-user?id=${data.authorId}" style="color: var(--secondary-color); text-decoration: none;">${authorDisplayName}</a>`;
                         }
                     }
 
@@ -1160,7 +1327,7 @@
                         <h3>${data.title}</h3>
                         <p><i class="fas fa-id-badge"></i> מזהה כתבה: ${articleId}</p>
                         <p><i class="fas fa-calendar-alt"></i> תאריך יצירה: ${publishDate} בשעה ${publishTime}</p>
-                        <p><i class="fas fa-user"></i> יוצר: <a href="#single-user?id=${data.authorId}" style="color: var(--secondary-color); text-decoration: none;">${authorName}</a></p>
+                        <p><i class="fas fa-user"></i> יוצר: ${authorLinkHtml}</p>
                         <div class="article-content">
                             <p><strong>תוכן:</strong></p>
                             ${data.content}
@@ -1173,18 +1340,18 @@
 
                 } else {
                     articleContainer.innerHTML = '<p class="error-message">הכתבה לא נמצאה.</p>';
-                    showAdminMessage('error', 'הכתבה לא נמצאה.', 'single-article-admin-message');
+                    showMessage('error', 'הכתבה לא נמצאה.', 'single-article-admin-message');
                 }
             } catch (error) {
                 console.error("Error loading single article for admin:", error);
                 articleContainer.innerHTML = '<p class="error-message">שגיאה בטעינת פרטי הכתבה.</p>';
-                showAdminMessage('error', 'שגיאה בטעינת פרטי הכתבה.', 'single-article-admin-message');
+                showMessage('error', 'שגיאה בטעינת פרטי הכתבה.', 'single-article-admin-message');
             }
         }
 
         async function loadSingleUserAdminPage(userId) {
-            if (!currentAdminUser) return renderLoginPage();
-            renderAdminPage(`
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
                 <h2 class="admin-page-title"><i class="fas fa-user-circle"></i> ניהול משתמש</h2>
                 <div id="single-user-admin-message"></div>
                 <div id="admin-single-user">טוען פרטי משתמש... <i class="fas fa-spinner fa-spin"></i></div>
@@ -1211,14 +1378,14 @@
                         <form id="edit-user-form" style="margin-top: 20px;">
                             <h4><i class="fas fa-edit"></i> ערוך פרטי משתמש</h4>
                             <input type="text" id="edit-user-full-name" placeholder="שם מלא" value="${userData.fullName || ''}" required>
-                            <input type="email" id="edit-user-email" placeholder="אימייל" value="${userData.email}" required>
+                            <input type="text" id="edit-user-email" placeholder="אימייל" value="${userData.email}" required>
                             <button type="submit"><i class="fas fa-save"></i> שמור שינויים</button>
                         </form>
 
                         <h4 style="margin-top: 30px;"><i class="fas fa-lock"></i> פעולות אבטחה</h4>
                         <div class="admin-action-group">
-                            <button class="warning-btn" onclick="confirmResetUserPassword('${userData.email}')" style="background-color: var(--warning-color); color: white;"><i class="fas fa-key"></i> אפס סיסמת משתמש</button>
-                            <button class="${userData.isSuspended ? 'success-btn' : 'error-btn'}"
+                            <button class="action-btn" onclick="confirmResetUserPassword('${userId}', '${userData.email}')" style="background-color: var(--warning-color); color: white;"><i class="fas fa-key"></i> אפס סיסמת משתמש (דרך אימייל)</button>
+                            <button class="${userData.isSuspended ? 'action-btn' : 'action-btn'}"
                                     onclick="${userData.isSuspended ? `confirmActivateUser('${userId}', '${userData.fullName || userData.email}')` : `confirmSuspendUser('${userId}', '${userData.fullName || userData.email}')`}"
                                     style="background-color: ${userData.isSuspended ? 'var(--success-color)' : 'var(--error-color)'}; color: white;">
                                 <i class="fas ${userData.isSuspended ? 'fa-check-circle' : 'fa-minus-circle'}"></i> ${userData.isSuspended ? 'הפעל חשבון' : 'השהה חשבון'}
@@ -1261,27 +1428,28 @@
 
                 } else {
                     userContainer.innerHTML = '<p class="error-message">המשתמש לא נמצא.</p>';
-                    showAdminMessage('error', 'המשתמש לא נמצא.', 'single-user-admin-message');
+                    showMessage('error', 'המשתמש לא נמצא.', 'single-user-admin-message');
                 }
             } catch (error) {
                 console.error("Error loading single user for admin:", error);
                 userContainer.innerHTML = '<p class="error-message">שגיאה בטעינת פרטי המשתמש.</p>';
-                showAdminMessage('error', 'שגיאה בטעינת פרטי המשתמש.', 'single-user-admin-message');
+                showMessage('error', 'שגיאה בטעינת פרטי המשתמש.', 'single-user-admin-message');
             }
         }
 
         async function loadManageAdminsPage() {
-            if (!currentAdminUser) return renderLoginPage();
-            renderAdminPage(`
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
                 <h2 class="admin-page-title"><i class="fas fa-user-shield"></i> ניהול מנהלים</h2>
                 <div id="manage-admins-message"></div>
-                <form id="add-admin-form">
+                <form id="add-admin-manual-form">
                     <h3><i class="fas fa-user-plus"></i> הוסף מנהל חדש</h3>
                     <p style="font-size: 0.9em; color: var(--light-text-color); margin-bottom: 10px;">
-                       **חשוב:** צור את המשתמש תחילה ב-Firebase Authentication, ואז סמן אותו כמנהל כאן.
+                       הוסף שם משתמש וסיסמה חדשים למנהל. שם המשתמש יופיע בכתובת ה-URL.
                     </p>
-                    <input type="email" id="new-admin-email" placeholder="אימייל משתמש קיים ב-Firebase Authentication" required>
-                    <input type="text" id="new-admin-display-name" placeholder="שם תצוגה למנהל (לדוגמה: NewsE Admin)" required>
+                    <input type="text" id="new-admin-name" placeholder="שם משתמש למנהל (לדוגמה: NewsEAdmin)" required>
+                    <input type="password" id="new-admin-password-manual" placeholder="סיסמה למנהל" required>
+                    <input type="password" id="new-admin-password-confirm-manual" placeholder="אשר סיסמה" required>
                     <button type="submit"><i class="fas fa-user-plus"></i> הוסף מנהל</button>
                 </form>
 
@@ -1289,16 +1457,16 @@
                 <div id="admins-list-container">טוען מנהלים... <i class="fas fa-spinner fa-spin"></i></div>
             `);
 
-            const addAdminForm = document.getElementById('add-admin-form');
-            addAdminForm.addEventListener('submit', handleAddAdmin);
-            addValidationListeners(addAdminForm);
+            const addAdminManualForm = document.getElementById('add-admin-manual-form');
+            addAdminManualForm.addEventListener('submit', handleAddAdminManual);
+            addValidationListeners(addAdminManualForm);
 
             const adminsListContainer = document.getElementById('admins-list-container');
             try {
                 const adminsSnapshot = await firestore.collection('admins').get();
                 const admins = [];
                 adminsSnapshot.forEach(doc => {
-                    admins.push({ uid: doc.id, ...doc.data() });
+                    admins.push({ username: doc.id, ...doc.data() });
                 });
 
                 if (admins.length === 0) {
@@ -1310,20 +1478,21 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>UID מנהל</th>
-                                <th>אימייל / שם תצוגה</th>
+                                <th>שם משתמש מנהל</th>
+                                <th>תאריך יצירה</th>
                                 <th>פעולות</th>
                             </tr>
                         </thead>
                         <tbody>
                 `;
                 admins.forEach(admin => {
+                    const createdAt = admin.createdAt ? new Date(admin.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
                     tableHtml += `
                         <tr>
-                            <td>${admin.uid}</td>
-                            <td>${admin.displayName || admin.email || 'לא ידוע'}</td>
+                            <td>${admin.username}</td>
+                            <td>${createdAt}</td>
                             <td class="action-buttons">
-                                <button class="delete-btn" onclick="confirmAdminDelete('${admin.uid}', '${admin.displayName || admin.email}')"><i class="fas fa-trash-alt"></i> מחק</button>
+                                <button class="delete-btn" onclick="confirmAdminDelete('${admin.username}')"><i class="fas fa-trash-alt"></i> מחק</button>
                             </td>
                         </tr>
                     `;
@@ -1334,9 +1503,10 @@
             } catch (error) {
                 console.error("Error fetching admins:", error);
                 adminsListContainer.innerHTML = '<p class="error-message">שגיאה בטעינת רשימת המנהלים.</p>';
-                showAdminMessage('error', 'שגיאה בטעינת רשימת המנהלים.', 'manage-admins-message');
+                showMessage('error', 'שגיאה בטעינת רשימת המנהלים.', 'manage-admins-message');
             }
         }
+
 
         // --- Admin Actions (Articles) ---
 
@@ -1350,24 +1520,22 @@
 
             const title = document.getElementById('admin-article-title').value;
             const content = document.getElementById('admin-article-content').value;
-            const authorId = currentAdminUser.uid;
-            const authorEmail = currentAdminUser.email;
 
             try {
                 const newArticleRef = await firestore.collection('articles').add({
                     title: title,
                     content: content,
-                    authorId: authorId,
-                    authorEmail: authorEmail,
+                    authorName: "מערכת NewsE", // Fixed author name
+                    authorId: "system-admin", // Unique ID for system-created articles
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                showAdminMessage('success', `הכתבה פורסמה בהצלחה על ידי ${currentAdminUser.displayName}!`, 'admin-create-article-message');
+                showMessage('success', `הכתבה פורסמה בהצלחה על ידי ${ADMIN_DISPLAY_NAME_FIXED}!`, 'admin-create-article-message');
                 form.reset();
                 window.location.hash = `#single-article?id=${newArticleRef.id}`;
             } catch (error) {
                 console.error('שגיאה ביצירת הכתבה:', error);
-                showAdminMessage('error', `שגיאה ביצירת הכתבה: ${error.message}.`, 'admin-create-article-message');
+                showMessage('error', `שגיאה ביצירת הכתבה: ${error.message}.`, 'admin-create-article-message');
             }
         }
 
@@ -1381,7 +1549,7 @@
 
             const articleId = window.adminEditingArticleId;
             if (!articleId) {
-                showAdminMessage('error', 'אין כתבה לעדכון. אנא בחר כתבה לעריכה.', 'admin-create-article-message');
+                showMessage('error', 'אין כתבה לעדכון. אנא בחר כתבה לעריכה.', 'admin-create-article-message');
                 return;
             }
 
@@ -1394,12 +1562,12 @@
                     content: content
                 });
 
-                showAdminMessage('success', 'הכתבה עודכנה בהצלחה!', 'admin-create-article-message');
+                showMessage('success', 'הכתבה עודכנה בהצלחה!', 'admin-create-article-message');
                 window.location.hash = `#single-article?id=${articleId}`;
                 window.adminEditingArticleId = null;
             } catch (error) {
                 console.error('שגיאה בעדכון הכתבה:', error);
-                showAdminMessage('error', `שגיאה בעדכון הכתבה: ${error.message}.`, 'admin-create-article-message');
+                showMessage('error', `שגיאה בעדכון הכתבה: ${error.message}.`, 'admin-create-article-message');
             }
         }
 
@@ -1413,11 +1581,11 @@
         async function deleteArticle(articleId) {
             try {
                 await firestore.collection('articles').doc(articleId).delete();
-                showAdminMessage('success', 'הכתבה נמחקה בהצלחה!', 'manage-articles-message');
+                showMessage('success', 'הכתבה נמחקה בהצלחה!', 'manage-articles-message');
                 window.location.hash = '#manage-articles';
             } catch (error) {
                 console.error('שגיאה במחיקת הכתבה:', error);
-                showAdminMessage('error', `שגיאה במחיקת הכתבה: ${error.message}.`, 'manage-articles-message');
+                showMessage('error', `שגיאה במחיקת הכתבה: ${error.message}.`, 'manage-articles-message');
             }
         }
 
@@ -1437,44 +1605,41 @@
             try {
                 await firestore.collection('users').doc(userId).update({
                     fullName: fullName,
-                    email: email
+                    email: email // Note: This only updates the Firestore profile, not Firebase Auth email.
                 });
-                // Note: Changing email here only updates Firestore. Firebase Auth email needs Admin SDK.
-                showAdminMessage('success', 'פרטי המשתמש עודכנו בהצלחה!', 'single-user-admin-message');
-                loadSingleUserAdminPage(userId);
+                showMessage('success', 'פרטי המשתמש עודכנו בהצלחה!', 'single-user-admin-message');
+                loadSingleUserAdminPage(userId); // Reload page to reflect changes
             } catch (error) {
                 console.error('שגיאה בעדכון פרטי משתמש:', error);
-                showAdminMessage('error', `שגיאה בעדכון פרטי משתמש: ${error.message}.`, 'single-user-admin-message');
+                showMessage('error', `שגיאה בעדכון פרטי משתמש: ${error.message}.`, 'single-user-admin-message');
             }
         }
 
-        function confirmResetUserPassword(userEmail) {
+        function confirmResetUserPassword(userId, userEmail) {
+            // Note: Firebase client SDK does not allow direct password reset for other users.
+            // This would typically involve Firebase Authentication sendPasswordResetEmail
+            // which requires the email to be linked to an authenticated user.
+            // For a production app, this would be a Firebase Cloud Function.
             showAdminConfirmationModal(
-                `האם אתה בטוח שברצונך לאפס את הסיסמה עבור המשתמש "${userEmail}"? אימייל לאיפוס סיסמה ישלח למשתמש.`,
-                () => resetUserPassword(userEmail)
+                `אזהרה: פעולת איפוס סיסמה עבור "${userEmail}" אינה נתמכת ישירות מהצד לקוח עבור משתמשים אחרים. נדרש פתרון שרת (כמו Firebase Cloud Functions) לשלוח אימייל איפוס סיסמה למשתמש.`,
+                () => { /* Do nothing, as direct reset is not possible */ },
+                () => { /* Do nothing on cancel */ },
+                'הבנתי',
+                'בטל'
             );
         }
 
-        async function resetUserPassword(userEmail) {
-            try {
-                await auth.sendPasswordResetEmail(userEmail);
-                showAdminMessage('success', `אימייל לאיפוס סיסמה נשלח בהצלחה ל-${userEmail}.`, 'single-user-admin-message');
-            } catch (error) {
-                console.error('שגיאה באיפוס סיסמה למשתמש:', error);
-                showAdminMessage('error', `שגיאה באיפוס סיסמה: ${error.message}.`, 'single-user-admin-message');
-            }
-        }
 
         function confirmSuspendUser(userId, userName) {
             showAdminConfirmationModal(
-                `האם אתה בטוח שברצונך להשהות את חשבון המשתמש "${userName}"? משתמש זה לא יוכל להתחבר.`,
+                `האם אתה בטוח שברצונך להשהות את חשבון המשתמש "${userName}"? סטטוס המשתמש ישתנה למושעה.`,
                 () => toggleUserStatus(userId, true)
             );
         }
 
         function confirmActivateUser(userId, userName) {
             showAdminConfirmationModal(
-                `האם אתה בטוח שברצונך להפעיל מחדש את חשבון המשתמש "${userName}"? משתמש זה יוכל להתחבר.`,
+                `האם אתה בטוח שברצונך להפעיל מחדש את חשבון המשתמש "${userName}"? סטטוס המשתמש ישתנה לפעיל.`,
                 () => toggleUserStatus(userId, false)
             );
         }
@@ -1484,13 +1649,13 @@
                 await firestore.collection('users').doc(userId).update({
                     isSuspended: suspend
                 });
-                // To actually disable the user from logging in via Firebase Auth, you need Admin SDK on server.
-                // This client-side only updates their Firestore profile.
-                showAdminMessage('success', `החשבון ${suspend ? 'הושעה' : 'הופעל'} בהצלחה!`, 'single-user-admin-message');
-                loadSingleUserAdminPage(userId);
+                // In a real app, you would also use Firebase Admin SDK (via Cloud Function)
+                // to enable/disable the user in Firebase Authentication itself.
+                showMessage('success', `החשבון ${suspend ? 'הושעה' : 'הופעל'} בהצלחה!`, 'single-user-admin-message');
+                loadSingleUserAdminPage(userId); // Reload page to reflect changes
             } catch (error) {
                 console.error('שגיאה בשינוי סטטוס משתמש:', error);
-                showAdminMessage('error', `שגיאה בשינוי סטטוס משתמש: ${error.message}.`, 'single-user-admin-message');
+                showMessage('error', `שגיאה בשינוי סטטוס משתמש: ${error.message}.`, 'single-user-admin-message');
             }
         }
 
@@ -1508,20 +1673,20 @@
 
                         await firestore.collection('users').doc(userId).delete();
 
-                        // IMPORTANT: To delete the user from Firebase Authentication, you NEED the Admin SDK on a secure server.
+                        // IMPORTANT: To delete the user from Firebase Authentication, you NEED the Admin SDK on a secure server (e.g., Cloud Function).
                         // This client-side code CANNOT delete a Firebase Auth user directly.
-                        showAdminMessage('warning', 'חשבון המשתמש וכתבותיו נמחקו מה-Firestore. יש למחוק את המשתמש מ-Firebase Authentication באופן ידני או דרך שרת.', 'single-user-admin-message');
+                        showMessage('warning', 'חשבון המשתמש וכתבותיו נמחקו מה-Firestore. אם משתמש זה קיים גם ב-Firebase Authentication, יש למחוק אותו משם באופן ידני או דרך פונקציית שרת מאובטחת.', 'single-user-admin-message');
                         window.location.hash = '#manage-users';
                     } catch (error) {
                         console.error('שגיאה במחיקת משתמש:', error);
-                        showAdminMessage('error', `שגיאה במחיקת משתמש: ${error.message}.`, 'single-user-admin-message');
+                        showMessage('error', `שגיאה במחיקת משתמש: ${error.message}.`, 'single-user-admin-message');
                     }
                 }
             );
         }
 
-        // --- Admin Actions (Admins - now managed via Firestore + Auth) ---
-        async function handleAddAdmin(event) {
+        // --- Admin Actions (Admins - now managed via Firestore) ---
+        async function handleAddAdminManual(event) {
             event.preventDefault();
             const form = event.target;
             if (!form.checkValidity()) {
@@ -1529,64 +1694,67 @@
                 return;
             }
 
-            const email = document.getElementById('new-admin-email').value.trim();
-            const displayName = document.getElementById('new-admin-display-name').value.trim();
+            const username = document.getElementById('new-admin-name').value.trim();
+            const password = document.getElementById('new-admin-password-manual').value;
+            const confirmPassword = document.getElementById('new-admin-password-confirm-manual').value;
+            const messageDiv = document.getElementById('manage-admins-message');
+
+            if (password.length < 6) {
+                showMessage('error', 'הסיסמה חייבת להיות באורך 6 תווים לפחות.', 'manage-admins-message');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showMessage('error', 'הסיסמאות אינן תואמות.', 'manage-admins-message');
+                return;
+            }
 
             try {
-                // First, check if a user with this email exists in Firebase Authentication
-                // NOTE: Client-side SDK cannot directly get a user by email for security.
-                // A better approach in a real app would be Cloud Functions or Admin SDK on a server.
-                // For this client-side panel, we assume the user exists and try to fetch their Firestore 'users' profile.
-                const userDoc = await firestore.collection('users').where('email', '==', email).limit(1).get();
+                const adminDocRef = firestore.collection('admins').doc(username);
+                const adminDoc = await adminDocRef.get();
 
-                if (userDoc.empty) {
-                    showAdminMessage('error', 'לא נמצא משתמש רשום עם אימייל זה ב-Firestore. וודא שהמשתמש קיים ב-Firebase Authentication וגם בקולקציית "users" שלך.', 'manage-admins-message');
+                if (adminDoc.exists) {
+                    showMessage('error', `שם המנהל "${username}" כבר קיים. אנא בחר שם אחר.`, 'manage-admins-message');
                     return;
                 }
 
-                const userAuthId = userDoc.docs[0].id; // Get the UID from the Firestore user doc
-
-                // Add the user's UID to the 'admins' collection in Firestore
-                await firestore.collection('admins').doc(userAuthId).set({
-                    email: email,
-                    displayName: displayName,
-                    addedBy: currentAdminUser.uid,
-                    addedAt: firebase.firestore.FieldValue.serverTimestamp()
+                await adminDocRef.set({
+                    passwordHash: base64Encode(password),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                showAdminMessage('success', `משתמש "${displayName}" (UID: ${userAuthId}) הוגדר כמנהל בהצלחה!`, 'manage-admins-message');
+
+                showMessage('success', `מנהל "${username}" נוסף בהצלחה!`, 'manage-admins-message');
                 form.reset();
-                addValidationListeners(form);
-                loadManageAdminsPage();
+                addValidationListeners(form); // Re-add listeners after reset
+                loadManageAdminsPage(); // Reload the list of admins
             } catch (error) {
                 console.error('שגיאה בהוספת מנהל:', error);
-                showAdminMessage('error', `שגיאה בהוספת מנהל: ${error.message}.`, 'manage-admins-message');
+                showMessage('error', `שגיאה בהוספת מנהל: ${error.message}.`, 'manage-admins-message');
             }
         }
 
-        function confirmAdminDelete(adminUid, adminDisplayName) {
-            if (currentAdminUser && adminUid === currentAdminUser.uid) {
-                showAdminMessage('error', 'לא ניתן למחוק את המנהל המחובר כרגע.', 'manage-admins-message');
+        function confirmAdminDelete(adminUsername) {
+            if (adminUsername === currentAdminUserHash) {
+                showMessage('error', 'לא ניתן למחוק את המנהל המחובר כרגע.', 'manage-admins-message');
                 return;
             }
             showAdminConfirmationModal(
-                `האם אתה בטוח שברצונך להסיר את הרשאת המנהל עבור "${adminDisplayName}"? משתמש זה לא יוכל יותר לגשת לפאנל.`,
-                () => deleteAdmin(adminUid)
+                `האם אתה בטוח שברצונך למחוק את המנהל "${adminUsername}"? פעולה זו בלתי הפיכה.`,
+                () => deleteAdmin(adminUsername)
             );
         }
 
-        async function deleteAdmin(adminUid) {
+        async function deleteAdmin(adminUsername) {
             try {
-                await firestore.collection('admins').doc(adminUid).delete();
-                showAdminMessage('success', `הרשאת המנהל עבור ${adminUid} הוסרה בהצלחה!`, 'manage-admins-message');
-                loadManageAdminsPage();
+                await firestore.collection('admins').doc(adminUsername).delete();
+                showMessage('success', `מנהל "${adminUsername}" נמחק בהצלחה!`, 'manage-admins-message');
+                loadManageAdminsPage(); // Reload the list of admins
             } catch (error) {
                 console.error('שגיאה במחיקת מנהל:', error);
-                showAdminMessage('error', `שגיאה במחיקת מנהל: ${error.message}.`, 'manage-admins-message');
+                showMessage('error', `שגיאה במחיקת מנהל: ${error.message}.`, 'manage-admins-message');
             }
         }
-        // Removed resetAdminPasswordPrompt/resetAdminPassword functions as Firebase Auth manages passwords
 
-        // --- General Form Validation for Admin Panel ---
+        // --- General Form Validation ---
         function addValidationListeners(form) {
             form.querySelectorAll('input[required], textarea[required]').forEach(input => {
                 input.addEventListener('blur', () => {
@@ -1614,43 +1782,74 @@
             });
         }
 
+
         // --- Routing and Initialization ---
         function handleAdminHashChange() {
-            // Only proceed if currentAdminUser is set (meaning an admin is logged in)
-            if (!currentAdminUser) {
-                return; // The onAuthStateChanged listener will handle redirection to login
+            // Check if user is actually logged in before routing to internal pages
+            if (!sessionStorage.getItem('isAdminLoggedIn')) {
+                checkAdminAccess(); // This will show login or access denied
+                return;
             }
 
-            const hash = window.location.hash;
-            const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+            const hash = window.location.hash.split('?')[0]; // Get hash without query params
+            const urlParams = new URLSearchParams(window.location.hash.split('?')[1]); // Get query params
 
-            if (hash.startsWith('#manage-articles')) {
-                const searchTerm = urlParams.get('search') || '';
-                loadManageArticlesPage(decodeURIComponent(searchTerm));
-            } else if (hash.startsWith('#create-article')) {
-                const editId = urlParams.get('edit');
-                loadCreateArticleAdminPage(editId);
-            } else if (hash.startsWith('#manage-users')) {
-                const searchTerm = urlParams.get('search') || '';
-                loadManageUsersPage(decodeURIComponent(searchTerm));
-            } else if (hash.startsWith('#single-article')) {
-                const articleId = urlParams.get('id');
-                loadSingleArticleAdminPage(articleId);
-            } else if (hash.startsWith('#single-user')) {
-                const userId = urlParams.get('id');
-                loadSingleUserAdminPage(userId);
-            } else if (hash.startsWith('#manage-admins')) {
-                loadManageAdminsPage();
-            } else {
-                loadDashboard(); // Default to dashboard
+            switch (hash) {
+                case '#dashboard':
+                    loadDashboard();
+                    break;
+                case '#manage-articles':
+                    const articleSearchTerm = urlParams.get('search') || '';
+                    loadManageArticlesPage(decodeURIComponent(articleSearchTerm));
+                    break;
+                case '#create-article':
+                    const editArticleId = urlParams.get('edit');
+                    loadCreateArticleAdminPage(editArticleId);
+                    break;
+                case '#manage-users':
+                    const userSearchTerm = urlParams.get('search') || '';
+                    loadManageUsersPage(decodeURIComponent(userSearchTerm));
+                    break;
+                case '#single-article':
+                    const articleId = urlParams.get('id');
+                    if (articleId) loadSingleArticleAdminPage(articleId);
+                    else window.location.hash = '#manage-articles'; // Redirect if ID is missing
+                    break;
+                case '#single-user':
+                    const userId = urlParams.get('id');
+                    if (userId) loadSingleUserAdminPage(userId);
+                    else window.location.hash = '#manage-users'; // Redirect if ID is missing
+                    break;
+                case '#manage-admins':
+                    loadManageAdminsPage();
+                    break;
+                case '#admin': // This should only happen if someone types #admin without a user
+                    // Fall through to default if it's just #admin. checkAdminAccess handles the base /admin.html
+                    // If it was #admin/user and then they remove /user, it will trigger an invalid hash and fall to denied.
+                    checkAdminAccess();
+                    break;
+                default:
+                    // If hash is empty or unrecognized, redirect to dashboard if logged in
+                    // or let checkAdminAccess handle invalid hashes (like #admin without user)
+                    if (sessionStorage.getItem('isAdminLoggedIn')) {
+                        window.location.hash = '#dashboard';
+                    } else {
+                        checkAdminAccess();
+                    }
+                    break;
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Initial check for admin login status (this will also show loading screen)
-            checkAdminLoginState();
+            // Add event listener for the main login form
+            document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
+            // Add event listener for the "Add New Admin" form
+            document.getElementById('add-new-admin-form').addEventListener('submit', handleAddNewAdmin);
+            
+            // Initial check for admin access based on URL hash
+            checkAdminAccess();
 
-            // Attach event listeners
+            // Attach event listeners for sidebar and logout
             adminLogoutBtn.addEventListener('click', adminLogout);
             document.querySelectorAll('#admin-sidebar .sidebar-item').forEach(item => {
                 item.addEventListener('click', (e) => {
@@ -1659,16 +1858,11 @@
                 });
             });
 
-            // Handle hash change events (after initial state is determined by onAuthStateChanged)
-            window.addEventListener('hashchange', () => {
-                if (currentAdminUser) { // Only handle hash changes if an admin is already logged in
-                    handleAdminHashChange();
-                }
-                // If not logged in, onAuthStateChanged should handle it (by showing login)
-            });
+            // Handle hash change events
+            window.addEventListener('hashchange', handleAdminHashChange);
 
-            // Hide loading screen initially for rapid display if auth state is quickly resolved
-            // This is managed within checkAdminLoginState now, setting it to none there.
+            // Hide loading screen after initial checks
+            loadingScreen.style.display = 'none';
         });
     </script>
 </body>
