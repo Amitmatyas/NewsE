@@ -851,7 +851,7 @@
             return btoa(unescape(encodeURIComponent(str)));
         }
 
-        function base64Decode(str) {
+function base64Decode(str) {
             return decodeURIComponent(escape(atob(str)));
         }
 
@@ -865,11 +865,25 @@
                 const adminUserFromHash = hashParts[1].split('?')[0]; // Get 'AmitMatyas' from '#admin/AmitMatyas?x=y'
                 currentAdminUserHash = adminUserFromHash; // Store the admin username from the URL
 
-                // Render login page for this admin user
+                // --- תיקון: טיפול מיוחד ב-'initialSetup' ---
+                if (currentAdminUserHash === 'initialSetup') {
+                    renderPage('login'); // עדיין מציג את דף הלוגין הכללי (עם הכותרות וכו')
+                    document.getElementById('current-admin-user-display').textContent = `הגדרת מנהל ראשון: NewsE Admin`;
+                    showAdminCreationForm(); // **הפונקציה הזו מציגה את הטופס של הוספת מנהל חדש**
+                    document.getElementById('admin-login-message').style.display = 'none'; // מוחק הודעות קודמות אם היו
+                    // חשוב לוודא שהאלמנטים הקשורים ללוגין רגיל מוסתרים במצב זה:
+                    document.getElementById('admin-login-form').style.display = 'none'; 
+                    document.getElementById('show-add-admin-link').style.display = 'none';
+                    return; // סיים את הפונקציה כאן, אין צורך לבדוק במסד הנתונים
+                }
+                // --- סוף תיקון ---
+
+                // אם זה לא initialSetup, המשך כרגיל:
                 renderPage('login');
                 document.getElementById('current-admin-user-display').textContent = `הזן סיסמה עבור ${ADMIN_DISPLAY_NAME_FIXED} (${currentAdminUserHash})`;
                 
                 // Check if there are any admins in the database. If not, show "Add Admin" link.
+                // זהו בדיקה עתידית שתקבע אם להציג את הלינק ליצירת מנהל חדש בטופס ההתחברות הרגיל
                 try {
                     const adminsSnapshot = await firestore.collection('admins').get();
                     if (adminsSnapshot.empty) {
@@ -886,8 +900,9 @@
                 // If hash is not in '#admin/user' format (e.g., '', '#dashboard', or malformed)
                 renderPage('accessDenied');
                 document.getElementById('add-first-admin-btn').onclick = () => {
-                    window.location.hash = '#admin/initialSetup'; // Redirect to a placeholder hash for first admin setup
-                    checkAdminAccess(); // Re-run check to show login form for initial setup
+                    // כאשר לוחצים על הכפתור "הוסף מנהל ראשון", אנו מנתבים ל-initialSetup
+                    window.location.hash = '#admin/initialSetup'; 
+                    // אין צורך לקרוא ל-checkAdminAccess() כאן שוב, כי אירוע hashchange יטפל בזה
                 };
             }
         }
@@ -935,7 +950,7 @@
             sessionStorage.removeItem('isAdminLoggedIn');
             currentAdminUserHash = null;
             window.location.hash = ''; // Go back to base URL, will trigger access denied
-            checkAdminAccess();
+            // checkAdminAccess(); // This will be handled by the hashchange listener
         }
 
         function showAdminCreationForm() {
