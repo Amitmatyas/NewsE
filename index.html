@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NewsE</title>
+    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts: Poppins (for general text) & Rubik (for titles) -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Rubik:wght@700&display=swap" rel="stylesheet">
     <style>
         /* --- General & Base Styles --- */
         :root {
-            --primary-color: #4CAF50; /* ירוק */
-            --secondary-color: #FFC107; /* צהוב */
-            --dark-bg: #2C3E50; /* כחול כהה */
-            --light-bg: #ECF0F1; /* אפור בהיר */
-            --text-color: #34495E; /* כחול אפור כהה */
+            --primary-color: #4CAF50; /* Green */
+            --secondary-color: #FFC107; /* Yellow */
+            --dark-bg: #2C3E50; /* Dark Blue */
+            --light-bg: #ECF0F1; /* Light Gray */
+            --text-color: #34495E; /* Dark Grayish Blue */
             --light-text: #ECF0F1;
             --border-color: #BDC3C7;
             --success-color: #28a745;
@@ -430,20 +432,34 @@
 
     <div class="container" style="display: none;">
         <div id="app-content">
-            </div>
+            <!-- Dynamic content will be loaded here by JavaScript -->
+        </div>
     </div>
 
     <footer>
         <p>&copy; 2025 NewsE. כל הזכויות שמורות.</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Firebase SDKs - MUST be loaded BEFORE your custom JavaScript -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script>
-        // --- 1. Supabase Configuration ---
-        const SUPABASE_URL = 'https://iykdngupkwmtuwqrsus.supabase.co'; // ה-URL של הפרויקט שלך ב-Supabase
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5a2RuZ3Vwa3dtdHV3cXJzc3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MDI1MTUsImV4cCI6MjA2NTQ3ODUxNX0.wUM5KMInXNLhYOWACj6L7Lq3MApaVBzavxW8rMibJGU'; // המפתח הציבורי שלך מ-Supabase
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBr4kDzw3n5PDu2pbZ3MItnCxi8YJFCRIQ",
+            authDomain: "schoolmangers.firebaseapp.com",
+            projectId: "schoolmangers",
+            storageBucket: "schoolmangers.firebasestorage.app",
+            messagingSenderId: "894509181268",
+            appId: "1:894509181268:web:c8ac6305f23fa003e3c0c1",
+            measurementId: "G-BE0R2WQ35J"
+        };
 
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         // --- 2. DOM Elements ---
         const loadingScreen = document.getElementById('loading-screen');
@@ -472,20 +488,21 @@
         }
 
         async function updateAuthUI() {
-            const { data: { user } } = await supabase.auth.getUser();
-            currentUser = user;
-
-            if (currentUser) {
-                signupBtnNav.style.display = 'none';
-                loginBtnNav.style.display = 'none';
-                logoutBtn.style.display = 'inline-block';
-                createArticleBtn.style.display = 'inline-block';
-            } else {
-                signupBtnNav.style.display = 'inline-block';
-                loginBtnNav.style.display = 'inline-block';
-                logoutBtn.style.display = 'none';
-                createArticleBtn.style.display = 'none';
-            }
+            // Firebase Auth automatically manages the user state
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                if (currentUser) {
+                    signupBtnNav.style.display = 'none';
+                    loginBtnNav.style.display = 'none';
+                    logoutBtn.style.display = 'inline-block';
+                    createArticleBtn.style.display = 'inline-block';
+                } else {
+                    signupBtnNav.style.display = 'inline-block';
+                    loginBtnNav.style.display = 'inline-block';
+                    logoutBtn.style.display = 'none';
+                    createArticleBtn.style.display = 'none';
+                }
+            });
         }
 
         // --- 4. Page Loaders ---
@@ -552,32 +569,41 @@
             renderPage(`
                 <div id="single-article-content">טוען כתבה... <i class="fas fa-spinner fa-spin"></i></div>
             `);
-            const { data, error } = await supabase
-                .from('articles')
-                .select('*')
-                .eq('id', articleId)
-                .single();
+            try {
+                const docRef = db.collection('articles').doc(articleId);
+                const docSnap = await docRef.get();
 
-            if (error || !data) {
+                if (docSnap.exists) {
+                    const data = docSnap.data();
+                    const articleHtml = `
+                        <h2>${data.title}</h2>
+                        <p><em><i class="fas fa-calendar-alt"></i> פורסם ב: ${new Date(data.createdAt.toDate()).toLocaleDateString()}</em></p>
+                        <div class="article-content">${data.content}</div>
+                        <p><a href="#" class="back-link"><i class="fas fa-arrow-left"></i> חזור לדף הבית</a></p>
+                    `;
+                    document.getElementById('single-article-content').innerHTML = articleHtml;
+                } else {
+                    console.error('שגיאה בטעינת הכתבה: לא נמצאה');
+                    renderPage(`
+                        <div style="text-align: center; padding: 50px;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 3em; color: var(--error-color);"></i>
+                            <h2>שגיאה 404</h2>
+                            <p>הכתבה לא נמצאה או שגיאה בטעינה. אנא נסה שוב מאוחר יותר.</p>
+                            <p><a href="#" class="back-link">חזור לדף הבית</a></p>
+                        </div>
+                    `);
+                }
+            } catch (error) {
                 console.error('שגיאה בטעינת הכתבה:', error);
                 renderPage(`
                     <div style="text-align: center; padding: 50px;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 3em; color: var(--error-color);"></i>
-                        <h2>שגיאה 404</h2>
-                        <p>הכתבה לא נמצאה או שגיאה בטעינה. אנא נסה שוב מאוחר יותר.</p>
+                        <h2>שגיאה בטעינה</h2>
+                        <p>אירעה שגיאה בטעינת הכתבה. אנא נסה שוב מאוחר יותר.</p>
                         <p><a href="#" class="back-link">חזור לדף הבית</a></p>
                     </div>
                 `);
-                return;
             }
-
-            const articleHtml = `
-                <h2>${data.title}</h2>
-                <p><em><i class="fas fa-calendar-alt"></i> פורסם ב: ${new Date(data.created_at).toLocaleDateString()}</em></p>
-                <div class="article-content">${data.content}</div>
-                <p><a href="#" class="back-link"><i class="fas fa-arrow-left"></i> חזור לדף הבית</a></p>
-            `;
-            document.getElementById('single-article-content').innerHTML = articleHtml;
         }
 
         // --- 5. Authentication Logic ---
@@ -586,29 +612,25 @@
             event.preventDefault();
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
-            const fullName = document.getElementById('signup-full-name').value;
+            const fullName = document.getElementById('signup-full-name').value; // Get full name
 
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
-                        full_name: fullName
-                    }
-                }
-            });
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
 
-            if (error) {
-                showMessage('error', `שגיאת הרשמה: ${error.message}`, 'signup-message');
-            } else if (data.user) {
+                // Save full name to a 'users' collection in Firestore
+                await db.collection('users').doc(user.uid).set({
+                    fullName: fullName,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
                 showMessage('success', `ההרשמה הצליחה! אנא התחבר.`, 'signup-message');
-                // If email confirmation is ON, user needs to verify email.
-                // If it's OFF, you can redirect directly to login.
-                // Supabase default is OFF for new projects, but check your settings.
+                // Firebase by default may send verification email, depends on config
                 setTimeout(() => { window.location.hash = '#login'; }, 1500);
-            } else {
-                 // This typically happens if email confirmation is ON and user needs to verify email
-                showMessage('success', `אימייל אישור נשלח לכתובת ${email}. אנא אמת את המייל שלך.`, 'signup-message');
+
+            } catch (error) {
+                showMessage('error', `שגיאת הרשמה: ${error.message}`, 'signup-message');
             }
         }
 
@@ -617,26 +639,23 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
-
-            if (error) {
-                showMessage('error', `שגיאת התחברות: ${error.message}`, 'login-message');
-            } else if (data.user) {
-                await updateAuthUI();
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                // Auth state observer will update currentUser and UI
                 window.location.hash = ''; // Go to home page
+            } catch (error) {
+                showMessage('error', `שגיאת התחברות: ${error.message}`, 'login-message');
             }
         }
 
         async function handleLogout() {
-            const { error } = await supabase.auth.signOut();
-            if (error) {
+            try {
+                await auth.signOut();
+                // Auth state observer will update currentUser and UI
+                window.location.hash = ''; // Go to home page (will reload as logged out)
+            } catch (error) {
                 console.error('שגיאת התנתקות:', error);
             }
-            await updateAuthUI();
-            window.location.hash = ''; // Go to home page (will reload as logged out)
         }
 
         // --- 6. Articles Logic ---
@@ -645,33 +664,36 @@
             const articlesListDiv = document.getElementById('articles-list');
             articlesListDiv.innerHTML = 'טוען מאמרים... <i class="fas fa-spinner fa-spin"></i>';
 
-            const { data, error } = await supabase
-                .from('articles')
-                .select('id, title, created_at')
-                .order('created_at', { ascending: false });
+            try {
+                // Query Firestore for articles, ordered by createdAt (newest first)
+                const querySnapshot = await db.collection('articles').orderBy('createdAt', 'desc').get();
+                const articles = [];
+                querySnapshot.forEach(doc => {
+                    articles.push({ id: doc.id, ...doc.data() });
+                });
 
-            if (error) {
+                if (articles.length === 0) {
+                    articlesListDiv.innerHTML = '<p style="text-align: center; color: #888; font-style: italic;">אין מאמרים עדיין. <br>היה הראשון לפרסם!</p>';
+                    return;
+                }
+
+                let articlesHtml = '';
+                articles.forEach((article, index) => {
+                    // Firebase Firestore stores timestamps as Timestamp objects, convert to Date
+                    const articleDate = article.createdAt ? new Date(article.createdAt.toDate()).toLocaleDateString() : 'תאריך לא ידוע';
+                    articlesHtml += `
+                        <div class="article-card" style="animation-delay: ${index * 0.1}s;">
+                            <h2><a href="#article-${article.id}">${article.title}</a></h2>
+                            <p><em><i class="fas fa-calendar-alt"></i> פורסם ב: ${articleDate}</em></p>
+                            <a href="#article-${article.id}" class="read-more">קרא עוד <i class="fas fa-arrow-left"></i></a>
+                        </div>
+                    `;
+                });
+                articlesListDiv.innerHTML = articlesHtml;
+            } catch (error) {
                 console.error('שגיאה בטעינת המאמרים:', error);
                 articlesListDiv.innerHTML = '<p class="error-message">שגיאה בטעינת המאמרים.</p>';
-                return;
             }
-
-            if (data.length === 0) {
-                articlesListDiv.innerHTML = '<p style="text-align: center; color: #888; font-style: italic;">אין מאמרים עדיין. <br>היה הראשון לפרסם!</p>';
-                return;
-            }
-
-            let articlesHtml = '';
-            data.forEach((article, index) => {
-                articlesHtml += `
-                    <div class="article-card" style="animation-delay: ${index * 0.1}s;">
-                        <h2><a href="#article-${article.id}">${article.title}</a></h2>
-                        <p><em><i class="fas fa-calendar-alt"></i> פורסם ב: ${new Date(article.created_at).toLocaleDateString()}</em></p>
-                        <a href="#article-${article.id}" class="read-more">קרא עוד <i class="fas fa-arrow-left"></i></a>
-                    </div>
-                `;
-            });
-            articlesListDiv.innerHTML = articlesHtml;
         }
 
         async function handleCreateArticle(event) {
@@ -684,22 +706,23 @@
                 return;
             }
 
-            const { data, error } = await supabase
-                .from('articles')
-                .insert([
-                    { title: title, content: content, author_id: currentUser.id }
-                ])
-                .select(); // Important: use .select() to get the full data of the newly created item
+            try {
+                // Add a new document to the 'articles' collection
+                const newArticleRef = await db.collection('articles').add({
+                    title: title,
+                    content: content,
+                    authorId: currentUser.uid, // Firebase user ID
+                    authorEmail: currentUser.email, // Can also save email
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp() // Timestamp from Firebase server
+                });
 
-            if (error) {
-                showMessage('error', `שגיאה ביצירת הכתבה: ${error.message}`, 'create-article-message');
-            } else if (data && data.length > 0) {
-                const newArticle = data[0];
-                const articleLink = `#article-${newArticle.id}`;
+                const articleLink = `#article-${newArticleRef.id}`;
                 showMessage('success', `הכתבה פורסמה בהצלחה! <a href="${articleLink}">לחץ כאן לצפייה בכתבה <i class="fas fa-external-link-alt"></i></a>`, 'create-article-message');
                 document.getElementById('create-article-form').reset();
-                // Optional: redirect after a short delay
                 setTimeout(() => { window.location.hash = articleLink; }, 2000);
+
+            } catch (error) {
+                showMessage('error', `שגיאה ביצירת הכתבה: ${error.message}`, 'create-article-message');
             }
         }
 
@@ -718,20 +741,29 @@
             } else {
                 loadHomePage();
             }
-            updateAuthUI(); // Ensure UI is updated with every route change
+            // The auth.onAuthStateChanged listener handles UI updates,
+            // but we call it here to ensure it runs on initial hash change
+            // and potentially after a manual hash change.
+            updateAuthUI();
         }
 
         // --- 8. Initialization and Loading Screen ---
         document.addEventListener('DOMContentLoaded', () => {
-            updateAuthUI();
-            handleHashChange(); // Load the correct page based on current hash
+            // Setup Firebase Auth state listener
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                // Once auth state is known, proceed with loading the app
+                handleHashChange(); // Load the correct page based on current hash
+                updateAuthUI(); // Update navigation buttons
 
-            // Hide loading screen and show the rest of the content after a short delay
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                header.style.display = 'flex';
-                container.style.display = 'block';
-            }, 1000); // Adjust the delay (in milliseconds) as needed
+                // Hide loading screen and show the rest of the content after a short delay
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    header.style.display = 'flex';
+                    container.style.display = 'block';
+                }, 1000); // Adjust the delay (in milliseconds) as needed for your preference
+            });
+
         });
 
         // Listen for hash changes in the URL
