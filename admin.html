@@ -230,7 +230,7 @@
             transform: translateY(-2px);
         }
 
-        /* Specific to login page (if separate login file) */
+        /* Specific to login page */
         #login-page {
             display: flex;
             justify-content: center;
@@ -641,7 +641,7 @@
             <h1>NewsE Admin</h1>
         </div>
         <div class="admin-info">
-            <span id="admin-display-name">NewsE</span>
+            <span id="admin-display-name"></span>
             <button id="admin-logout-btn"><i class="fas fa-sign-out-alt"></i> התנתק</button>
         </div>
     </header>
@@ -671,24 +671,23 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script>
         // admin.js combined
-const firebaseConfig = {
-    apiKey: "AIzaSyBr4kDzw3n5PDu2pbZ3MItnCxi8YJFCRIQ",
-    authDomain: "schoolmangers.firebaseapp.com",
-    projectId: "schoolmangers",
-    storageBucket: "schoolmangers.firebasestorage.app",
-    messagingSenderId: "894509181268",
-    appId: "1:894509181268:web:c8ac6305f23fa003e3c0c1",
-    measurementId: "G-BE0R2WQ35J", // זה עבור אנליטיקס, אפשר להשאיר או להסיר אם לא בשימוש
-    databaseURL: "https://schoolmangers-default-rtdb.firebaseio.com/" // **חשוב: הוספה זו היא עבור Realtime Database**
-};
+        // 1. Firebase Configuration and Initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyBr4kDzw3n5PDu2pbZ3MItnCxi8YJFCRIQ", // <-- החלף במפתח ה-API שלך
+            authDomain: "schoolmangers.firebaseapp.com", // <-- החלף במזהה הפרויקט שלך
+            projectId: "schoolmangers", // <-- החלף במזהה הפרויקט שלך
+            storageBucket: "schoolmangers.firebasestorage.app", // <-- החלף במזהה הפרויקט שלך
+            messagingSenderId: "894509181268", // <-- החלף במזהה השולח שלך
+            appId: "1:894509181268:web:c8ac6305f23fa003e3c0c1", // <-- החלף במזהה האפליקציה שלך
+            measurementId: "G-BE0R2WQ35J" // אופציונלי, עבור אנליטיקס
+        };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const firestore = firebase.firestore(); // For articles and user data
-        const rtdb = firebase.database(); // For admin authentication
+        const auth = firebase.auth(); // Added for authentication
+        const firestore = firebase.firestore();
 
         // 2. DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
@@ -704,13 +703,10 @@ const firebaseConfig = {
         const adminCancelActionBtn = document.getElementById('admin-cancel-action-btn');
 
         let currentAdminUser = null; // Stores the logged-in admin user's details
-        let pendingAdminAction = null; // For confirmation modal actions
-        let pendingAdminActionArgs = null; // Arguments for the pending action
 
         // --- Helper Functions ---
         function renderAdminPage(htmlContent) {
             adminContent.innerHTML = htmlContent;
-            // Update active sidebar item
             const hash = window.location.hash.split('?')[0];
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 if (item.getAttribute('href') === hash || (hash === '' && item.getAttribute('href') === '#dashboard')) {
@@ -725,9 +721,9 @@ const firebaseConfig = {
             const target = document.getElementById(targetElementId);
             if (!target) return;
             target.innerHTML = `<div class="${type}-message">${message}</div>`;
-            target.style.display = 'block'; // Ensure message container is visible
+            target.style.display = 'block';
             setTimeout(() => {
-                target.style.display = 'none'; // Hide after a few seconds
+                target.style.display = 'none';
             }, 5000);
         }
 
@@ -735,9 +731,8 @@ const firebaseConfig = {
             adminModalMessage.innerHTML = message;
             adminConfirmActionBtn.textContent = confirmBtnText;
             adminCancelActionBtn.textContent = cancelBtnText;
-            adminConfirmActionBtn.style.display = 'inline-block'; // Ensure confirm button is visible
+            adminConfirmActionBtn.style.display = 'inline-block';
 
-            // Clear previous listeners to prevent multiple calls
             adminConfirmActionBtn.onclick = null;
             adminCancelActionBtn.onclick = null;
 
@@ -752,127 +747,104 @@ const firebaseConfig = {
             adminConfirmationModal.style.display = 'flex';
         }
 
-
         // --- Admin Authentication Logic ---
-        async function checkAdminLogin(hash) {
+        async function checkAdminLoginState() {
             loadingScreen.style.display = 'flex';
             adminHeader.style.display = 'none';
             adminContainer.style.display = 'none';
 
-            if (hash.startsWith('#admin/')) {
-                const parts = hash.split('/');
-                if (parts.length === 2 && parts[1]) {
-                    const adminUserIdentifier = parts[1]; // This is like 'AmitMatyas'
-                    const adminRef = rtdb.ref('admins').child(adminUserIdentifier);
-                    const snapshot = await adminRef.once('value');
-
-                    if (snapshot.exists()) {
-                        // Display a password input field
-                        renderLoginPage(adminUserIdentifier, snapshot.val().passwordHash); // Pass passwordHash for comparison
-                    } else {
-                        renderAccessDenied('משתמש מנהל לא קיים.');
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    // User is signed in, check if they are an admin
+                    try {
+                        const adminDoc = await firestore.collection('admins').doc(user.uid).get();
+                        if (adminDoc.exists) {
+                            currentAdminUser = {
+                                uid: user.uid,
+                                email: user.email,
+                                displayName: adminDoc.data().displayName || user.email // Use custom display name or email
+                            };
+                            adminDisplayName.textContent = currentAdminUser.displayName;
+                            adminHeader.style.display = 'flex';
+                            adminContainer.style.display = 'flex';
+                            handleAdminHashChange(); // Load the correct page based on hash
+                        } else {
+                            // User is authenticated but not marked as admin in Firestore
+                            await auth.signOut(); // Force sign out
+                            renderLoginPage('אין לך הרשאות מנהל. התחבר עם חשבון מנהל.');
+                        }
+                    } catch (error) {
+                        console.error("Error checking admin status:", error);
+                        await auth.signOut();
+                        renderLoginPage('שגיאה בבדיקת הרשאות. נסה שוב.');
                     }
                 } else {
-                    renderAccessDenied('פורמט גישה שגוי. אנא נסה admin/#adminuser.');
+                    // No user is signed in
+                    currentAdminUser = null;
+                    renderLoginPage();
                 }
-            } else {
-                renderAccessDenied('הגישה נחסמה.');
-            }
-
-            loadingScreen.style.display = 'none';
+                loadingScreen.style.display = 'none';
+            });
         }
 
-        function renderLoginPage(adminUserIdentifier, expectedPasswordHash) {
-            adminContent.innerHTML = `
+        function renderLoginPage(message = '') {
+            renderAdminPage(`
                 <div id="login-page">
                     <div id="login-container">
                         <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="NewsE Logo" style="width: 80px; margin-bottom: 20px;">
                         <h2>התחברות למנהל</h2>
-                        <div id="admin-login-message"></div>
-                        <p style="margin-bottom: 15px;">התחבר כ: <strong style="color: var(--primary-color);">NewsE</strong></p>
+                        <div id="admin-login-message" class="${message ? 'error-message' : ''}" style="${message ? 'display: block;' : 'display: none;'}">${message}</div>
                         <form id="admin-login-form">
-                            <input type="password" id="admin-password" placeholder="סיסמת מנהל" required>
+                            <input type="email" id="admin-email" placeholder="אימייל מנהל" required>
+                            <input type="password" id="admin-password" placeholder="סיסמה" required>
                             <button type="submit"><i class="fas fa-sign-in-alt"></i> התחבר</button>
                         </form>
                         <p style="margin-top: 20px; font-size: 0.9em; color: var(--light-text-color);">
-                            אם שכחת את הסיסמה או אתה מנהל חדש, פנה לתמיכה.<br>
-                            או הזן שם משתמש מנהל חדש ב-URL.
+                            אם אין לך חשבון מנהל, צור אחד ב-Firebase Authentication וסמן אותו כ"מנהל" בקולקציית admins ב-Firestore.
                         </p>
                     </div>
                 </div>
-            `;
+            `);
 
             document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const email = document.getElementById('admin-email').value;
                 const password = document.getElementById('admin-password').value;
-                const enteredPasswordHash = btoa(password); // Simple Base64 encoding for comparison
+                const loginMessageDiv = document.getElementById('admin-login-message');
+                loginMessageDiv.style.display = 'none';
 
-                if (enteredPasswordHash === expectedPasswordHash) {
-                    currentAdminUser = { id: adminUserIdentifier, displayName: 'NewsE' }; // Set the active admin
-                    sessionStorage.setItem('adminLoggedIn', 'true');
-                    sessionStorage.setItem('currentAdminId', adminUserIdentifier);
-                    sessionStorage.setItem('currentAdminDisplayName', 'NewsE'); // Store NewsE for display
-                    window.location.hash = '#dashboard'; // Redirect to dashboard
-                } else {
-                    showAdminMessage('error', 'סיסמה שגויה.', 'admin-login-message');
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    // onAuthStateChanged listener will handle redirection upon successful sign-in
+                } catch (error) {
+                    let errorMessage = 'שגיאת התחברות.';
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                        errorMessage = 'אימייל או סיסמה שגויים.';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        errorMessage = 'נסיונות התחברות רבים מדי. נסה שוב מאוחר יותר.';
+                    } else {
+                        errorMessage = `שגיאה: ${error.message}`;
+                    }
+                    showAdminMessage('error', errorMessage, 'admin-login-message');
                 }
             });
         }
 
-        function renderAccessDenied(message) {
-            adminContent.innerHTML = `
-                <div style="text-align: center; padding: 50px; background-color: var(--card-background); border-radius: var(--border-radius); box-shadow: var(--box-shadow); max-width: 500px; margin: 50px auto;">
-                    <i class="fas fa-lock" style="font-size: 3em; color: var(--error-color); margin-bottom: 20px;"></i>
-                    <h2 class="admin-page-title" style="border-bottom: none;">גישה נחסמה</h2>
-                    <p style="font-size: 1.1em; color: var(--light-text-color); margin-bottom: 25px;">${message}</p>
-                    <form id="new-admin-user-form">
-                        <input type="text" id="new-admin-user-input" placeholder="הזן adminuser חדש (לדוגמה: NewsE)" required>
-                        <button type="submit">המשך</button>
-                    </form>
-                    <p style="margin-top: 20px; font-size: 0.9em; color: var(--light-text-color);">
-                        הזן את שם המשתמש המנהל שאליו ברצונך להתחבר.
-                    </p>
-                </div>
-            `;
-
-            document.getElementById('new-admin-user-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const newUser = document.getElementById('new-admin-user-input').value.trim();
-                if (newUser) {
-                    window.location.hash = `#admin/${newUser}`;
-                }
-            });
-        }
-
-        function adminLogout() {
-            currentAdminUser = null;
-            sessionStorage.removeItem('adminLoggedIn');
-            sessionStorage.removeItem('currentAdminId');
-            sessionStorage.removeItem('currentAdminDisplayName');
-            window.location.hash = '#admin/'; // Redirect to a generic admin access denied
-            checkAdminLogin('#admin/'); // Re-trigger the access denied screen
-        }
-
-        // Function to handle initial admin check and UI update
-        function updateAdminUI() {
-            if (sessionStorage.getItem('adminLoggedIn') === 'true' && sessionStorage.getItem('currentAdminId')) {
-                currentAdminUser = {
-                    id: sessionStorage.getItem('currentAdminId'),
-                    displayName: sessionStorage.getItem('currentAdminDisplayName')
-                };
-                adminHeader.style.display = 'flex';
-                adminContainer.style.display = 'flex';
-                adminDisplayName.textContent = currentAdminUser.displayName;
-            } else {
-                adminHeader.style.display = 'none';
-                adminContainer.style.display = 'none';
-                checkAdminLogin(window.location.hash); // Trigger login/access denied
+        async function adminLogout() {
+            try {
+                await auth.signOut();
+                currentAdminUser = null;
+                // onAuthStateChanged will redirect to login page
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showAdminMessage('error', 'שגיאה בהתנתקות.', 'admin-login-message'); // This message won't be visible immediately
             }
         }
 
         // --- Admin Page Loaders ---
 
         async function loadDashboard() {
+            if (!currentAdminUser) return renderLoginPage(); // Ensure user is logged in
             renderAdminPage(`
                 <h2 class="admin-page-title"><i class="fas fa-tachometer-alt"></i> לוח בקרה</h2>
                 <div id="dashboard-message"></div>
@@ -904,7 +876,7 @@ const firebaseConfig = {
                 document.getElementById('total-articles-stat').textContent = articlesSnapshot.size;
                 document.getElementById('total-users-stat').textContent = usersSnapshot.size;
 
-                const adminArticles = articlesSnapshot.docs.filter(doc => doc.data().authorId === 'system_NewsE_admin');
+                const adminArticles = articlesSnapshot.docs.filter(doc => doc.data().authorId === currentAdminUser.uid);
                 document.getElementById('admin-articles-stat').textContent = adminArticles.length;
 
             } catch (error) {
@@ -914,6 +886,7 @@ const firebaseConfig = {
         }
 
         async function loadManageArticlesPage(searchTerm = '') {
+            if (!currentAdminUser) return renderLoginPage();
             renderAdminPage(`
                 <h2 class="admin-page-title"><i class="fas fa-newspaper"></i> ניהול כתבות</h2>
                 <div id="manage-articles-message"></div>
@@ -1008,15 +981,14 @@ const firebaseConfig = {
             }
         }
 
-
         async function loadCreateArticleAdminPage(articleIdToEdit = null) {
+            if (!currentAdminUser) return renderLoginPage();
             let pageTitle = 'צור כתבה חדשה (מערכת)';
             let submitBtnText = 'פרסם כתבה';
             let initialTitle = '';
             let initialContent = '';
-            let currentArticleAuthorId = 'system_NewsE_admin'; // Default for admin-created articles
+            let currentArticleAuthorId = currentAdminUser.uid; // Default for admin-created articles
 
-            // Store the ID of the article being edited globally if it's an edit operation
             window.adminEditingArticleId = articleIdToEdit;
 
             if (articleIdToEdit) {
@@ -1028,7 +1000,7 @@ const firebaseConfig = {
                         const data = docSnap.data();
                         initialTitle = data.title;
                         initialContent = data.content;
-                        currentArticleAuthorId = data.authorId; // Preserve original author
+                        currentArticleAuthorId = data.authorId;
                     } else {
                         console.warn("Article for editing not found, switching to create mode.");
                         articleIdToEdit = null;
@@ -1062,10 +1034,11 @@ const firebaseConfig = {
                     handleAdminCreateArticle(e);
                 }
             });
-            addValidationListeners(form); // Add validation handling
+            addValidationListeners(form);
         }
 
         async function loadManageUsersPage(searchTerm = '') {
+            if (!currentAdminUser) return renderLoginPage();
             renderAdminPage(`
                 <h2 class="admin-page-title"><i class="fas fa-users-cog"></i> ניהול משתמשים</h2>
                 <div id="manage-users-message"></div>
@@ -1155,70 +1128,8 @@ const firebaseConfig = {
             }
         }
 
-        async function loadManageAdminsPage() {
-            renderAdminPage(`
-                <h2 class="admin-page-title"><i class="fas fa-user-shield"></i> ניהול מנהלים</h2>
-                <div id="manage-admins-message"></div>
-                <form id="add-admin-form">
-                    <h3><i class="fas fa-user-plus"></i> הוסף מנהל חדש</h3>
-                    <input type="text" id="new-admin-id" placeholder="מזהה מנהל (לדוגמה: NewsE)" required>
-                    <input type="password" id="new-admin-password" placeholder="סיסמה למנהל חדש" required>
-                    <button type="submit"><i class="fas fa-user-plus"></i> הוסף מנהל</button>
-                </form>
-
-                <h3><i class="fas fa-list"></i> רשימת מנהלים קיימים</h3>
-                <div id="admins-list-container">טוען מנהלים... <i class="fas fa-spinner fa-spin"></i></div>
-            `);
-
-            const addAdminForm = document.getElementById('add-admin-form');
-            addAdminForm.addEventListener('submit', handleAddAdmin);
-            addValidationListeners(addAdminForm);
-
-            const adminsListContainer = document.getElementById('admins-list-container');
-            try {
-                const adminsSnapshot = await rtdb.ref('admins').once('value');
-                const admins = [];
-                adminsSnapshot.forEach(childSnapshot => {
-                    admins.push({ id: childSnapshot.key, ...childSnapshot.val() });
-                });
-
-                if (admins.length === 0) {
-                    adminsListContainer.innerHTML = '<p style="text-align: center; color: #888;">אין מנהלים רשומים.</p>';
-                    return;
-                }
-
-                let tableHtml = `
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>מזהה מנהל</th>
-                                <th>פעולות</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                admins.forEach(admin => {
-                    tableHtml += `
-                        <tr>
-                            <td>${admin.id}</td>
-                            <td class="action-buttons">
-                                <button class="delete-btn" onclick="confirmAdminDelete('${admin.id}')"><i class="fas fa-trash-alt"></i> מחק</button>
-                                <button class="edit-btn" onclick="resetAdminPasswordPrompt('${admin.id}')"><i class="fas fa-key"></i> אפס סיסמה</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tableHtml += `</tbody></table>`;
-                adminsListContainer.innerHTML = tableHtml;
-
-            } catch (error) {
-                console.error("Error fetching admins:", error);
-                adminsListContainer.innerHTML = '<p class="error-message">שגיאה בטעינת רשימת המנהלים.</p>';
-                showAdminMessage('error', 'שגיאה בטעינת רשימת המנהלים.', 'manage-admins-message');
-            }
-        }
-
         async function loadSingleArticleAdminPage(articleId) {
+            if (!currentAdminUser) return renderLoginPage();
             renderAdminPage(`
                 <h2 class="admin-page-title"><i class="fas fa-file-alt"></i> ניהול כתבה</h2>
                 <div id="single-article-admin-message"></div>
@@ -1236,8 +1147,8 @@ const firebaseConfig = {
                     const publishTime = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : 'שעה לא ידועה';
 
                     let authorName = data.authorEmail || 'משתמש אנונימי';
-                    if (data.authorId === 'system_NewsE_admin') {
-                        authorName = 'מערכת NewsE (מנהל)';
+                    if (data.authorId === currentAdminUser.uid) { // Use current admin's UID
+                        authorName = `${currentAdminUser.displayName} (מנהל)`;
                     } else if (data.authorId) {
                         const userDoc = await firestore.collection('users').doc(data.authorId).get();
                         if (userDoc.exists) {
@@ -1272,6 +1183,7 @@ const firebaseConfig = {
         }
 
         async function loadSingleUserAdminPage(userId) {
+            if (!currentAdminUser) return renderLoginPage();
             renderAdminPage(`
                 <h2 class="admin-page-title"><i class="fas fa-user-circle"></i> ניהול משתמש</h2>
                 <div id="single-user-admin-message"></div>
@@ -1305,7 +1217,7 @@ const firebaseConfig = {
 
                         <h4 style="margin-top: 30px;"><i class="fas fa-lock"></i> פעולות אבטחה</h4>
                         <div class="admin-action-group">
-                            <button class="warning-btn" onclick="confirmResetUserPassword('${userId}', '${userData.email}')" style="background-color: var(--warning-color); color: white;"><i class="fas fa-key"></i> אפס סיסמת משתמש</button>
+                            <button class="warning-btn" onclick="confirmResetUserPassword('${userData.email}')" style="background-color: var(--warning-color); color: white;"><i class="fas fa-key"></i> אפס סיסמת משתמש</button>
                             <button class="${userData.isSuspended ? 'success-btn' : 'error-btn'}"
                                     onclick="${userData.isSuspended ? `confirmActivateUser('${userId}', '${userData.fullName || userData.email}')` : `confirmSuspendUser('${userId}', '${userData.fullName || userData.email}')`}"
                                     style="background-color: ${userData.isSuspended ? 'var(--success-color)' : 'var(--error-color)'}; color: white;">
@@ -1359,13 +1271,17 @@ const firebaseConfig = {
         }
 
         async function loadManageAdminsPage() {
+            if (!currentAdminUser) return renderLoginPage();
             renderAdminPage(`
                 <h2 class="admin-page-title"><i class="fas fa-user-shield"></i> ניהול מנהלים</h2>
                 <div id="manage-admins-message"></div>
                 <form id="add-admin-form">
                     <h3><i class="fas fa-user-plus"></i> הוסף מנהל חדש</h3>
-                    <input type="text" id="new-admin-id" placeholder="מזהה מנהל (לדוגמה: NewsE)" required>
-                    <input type="password" id="new-admin-password" placeholder="סיסמה למנהל חדש" required>
+                    <p style="font-size: 0.9em; color: var(--light-text-color); margin-bottom: 10px;">
+                       **חשוב:** צור את המשתמש תחילה ב-Firebase Authentication, ואז סמן אותו כמנהל כאן.
+                    </p>
+                    <input type="email" id="new-admin-email" placeholder="אימייל משתמש קיים ב-Firebase Authentication" required>
+                    <input type="text" id="new-admin-display-name" placeholder="שם תצוגה למנהל (לדוגמה: NewsE Admin)" required>
                     <button type="submit"><i class="fas fa-user-plus"></i> הוסף מנהל</button>
                 </form>
 
@@ -1379,10 +1295,10 @@ const firebaseConfig = {
 
             const adminsListContainer = document.getElementById('admins-list-container');
             try {
-                const adminsSnapshot = await rtdb.ref('admins').once('value');
+                const adminsSnapshot = await firestore.collection('admins').get();
                 const admins = [];
-                adminsSnapshot.forEach(childSnapshot => {
-                    admins.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                adminsSnapshot.forEach(doc => {
+                    admins.push({ uid: doc.id, ...doc.data() });
                 });
 
                 if (admins.length === 0) {
@@ -1394,7 +1310,8 @@ const firebaseConfig = {
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>מזהה מנהל</th>
+                                <th>UID מנהל</th>
+                                <th>אימייל / שם תצוגה</th>
                                 <th>פעולות</th>
                             </tr>
                         </thead>
@@ -1403,10 +1320,10 @@ const firebaseConfig = {
                 admins.forEach(admin => {
                     tableHtml += `
                         <tr>
-                            <td>${admin.id}</td>
+                            <td>${admin.uid}</td>
+                            <td>${admin.displayName || admin.email || 'לא ידוע'}</td>
                             <td class="action-buttons">
-                                <button class="delete-btn" onclick="confirmAdminDelete('${admin.id}')"><i class="fas fa-trash-alt"></i> מחק</button>
-                                <button class="edit-btn" onclick="resetAdminPasswordPrompt('${admin.id}')"><i class="fas fa-key"></i> אפס סיסמה</button>
+                                <button class="delete-btn" onclick="confirmAdminDelete('${admin.uid}', '${admin.displayName || admin.email}')"><i class="fas fa-trash-alt"></i> מחק</button>
                             </td>
                         </tr>
                     `;
@@ -1433,8 +1350,8 @@ const firebaseConfig = {
 
             const title = document.getElementById('admin-article-title').value;
             const content = document.getElementById('admin-article-content').value;
-            const authorId = 'system_NewsE_admin'; // Fixed author for admin articles
-            const authorEmail = 'system@newse.com'; // Fixed email for admin articles
+            const authorId = currentAdminUser.uid;
+            const authorEmail = currentAdminUser.email;
 
             try {
                 const newArticleRef = await firestore.collection('articles').add({
@@ -1445,9 +1362,9 @@ const firebaseConfig = {
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                showAdminMessage('success', `הכתבה פורסמה בהצלחה על ידי מערכת NewsE!`, 'admin-create-article-message');
+                showAdminMessage('success', `הכתבה פורסמה בהצלחה על ידי ${currentAdminUser.displayName}!`, 'admin-create-article-message');
                 form.reset();
-                window.location.hash = `#single-article?id=${newArticleRef.id}`; // Redirect to view the new article
+                window.location.hash = `#single-article?id=${newArticleRef.id}`;
             } catch (error) {
                 console.error('שגיאה ביצירת הכתבה:', error);
                 showAdminMessage('error', `שגיאה ביצירת הכתבה: ${error.message}.`, 'admin-create-article-message');
@@ -1478,8 +1395,8 @@ const firebaseConfig = {
                 });
 
                 showAdminMessage('success', 'הכתבה עודכנה בהצלחה!', 'admin-create-article-message');
-                window.location.hash = `#single-article?id=${articleId}`; // Redirect to view updated article
-                window.adminEditingArticleId = null; // Clear editing state
+                window.location.hash = `#single-article?id=${articleId}`;
+                window.adminEditingArticleId = null;
             } catch (error) {
                 console.error('שגיאה בעדכון הכתבה:', error);
                 showAdminMessage('error', `שגיאה בעדכון הכתבה: ${error.message}.`, 'admin-create-article-message');
@@ -1497,7 +1414,6 @@ const firebaseConfig = {
             try {
                 await firestore.collection('articles').doc(articleId).delete();
                 showAdminMessage('success', 'הכתבה נמחקה בהצלחה!', 'manage-articles-message');
-                // Refresh the list of articles (or navigate back)
                 window.location.hash = '#manage-articles';
             } catch (error) {
                 console.error('שגיאה במחיקת הכתבה:', error);
@@ -1521,37 +1437,33 @@ const firebaseConfig = {
             try {
                 await firestore.collection('users').doc(userId).update({
                     fullName: fullName,
-                    email: email // Note: Changing email here only updates Firestore. Firebase Auth email needs admin SDK.
+                    email: email
                 });
+                // Note: Changing email here only updates Firestore. Firebase Auth email needs Admin SDK.
                 showAdminMessage('success', 'פרטי המשתמש עודכנו בהצלחה!', 'single-user-admin-message');
-                loadSingleUserAdminPage(userId); // Reload page to show updated details
+                loadSingleUserAdminPage(userId);
             } catch (error) {
                 console.error('שגיאה בעדכון פרטי משתמש:', error);
                 showAdminMessage('error', `שגיאה בעדכון פרטי משתמש: ${error.message}.`, 'single-user-admin-message');
             }
         }
 
-        function confirmResetUserPassword(userId, userEmail) {
+        function confirmResetUserPassword(userEmail) {
             showAdminConfirmationModal(
-                `האם אתה בטוח שברצונך לאפס את הסיסמה עבור המשתמש "${userEmail}"? המשתמש יצטרך לבצע איפוס סיסמה דרך האפליקציה הראשית.`,
-                () => resetUserPassword(userId, userEmail)
+                `האם אתה בטוח שברצונך לאפס את הסיסמה עבור המשתמש "${userEmail}"? אימייל לאיפוס סיסמה ישלח למשתמש.`,
+                () => resetUserPassword(userEmail)
             );
         }
 
-        async function resetUserPassword(userId, userEmail) {
+        async function resetUserPassword(userEmail) {
             try {
-                // Firebase Auth password reset requires Admin SDK on server, or client-side flow.
-                // For security, usually this sends a password reset email.
-                // This is a placeholder for a more complex process.
-                // For a client-side admin panel, the only option is to send a password reset email.
-                await firebase.auth().sendPasswordResetEmail(userEmail);
+                await auth.sendPasswordResetEmail(userEmail);
                 showAdminMessage('success', `אימייל לאיפוס סיסמה נשלח בהצלחה ל-${userEmail}.`, 'single-user-admin-message');
             } catch (error) {
                 console.error('שגיאה באיפוס סיסמה למשתמש:', error);
                 showAdminMessage('error', `שגיאה באיפוס סיסמה: ${error.message}.`, 'single-user-admin-message');
             }
         }
-
 
         function confirmSuspendUser(userId, userName) {
             showAdminConfirmationModal(
@@ -1572,10 +1484,10 @@ const firebaseConfig = {
                 await firestore.collection('users').doc(userId).update({
                     isSuspended: suspend
                 });
-                // You'd also need to disable the user in Firebase Authentication using Admin SDK on a server.
-                // For client-side, we can only update their Firestore profile.
+                // To actually disable the user from logging in via Firebase Auth, you need Admin SDK on server.
+                // This client-side only updates their Firestore profile.
                 showAdminMessage('success', `החשבון ${suspend ? 'הושעה' : 'הופעל'} בהצלחה!`, 'single-user-admin-message');
-                loadSingleUserAdminPage(userId); // Reload page to show updated status
+                loadSingleUserAdminPage(userId);
             } catch (error) {
                 console.error('שגיאה בשינוי סטטוס משתמש:', error);
                 showAdminMessage('error', `שגיאה בשינוי סטטוס משתמש: ${error.message}.`, 'single-user-admin-message');
@@ -1587,7 +1499,6 @@ const firebaseConfig = {
                 `האם אתה בטוח שברצונך למחוק את חשבון המשתמש "${userName}" וכל הכתבות שלו? פעולה זו בלתי הפיכה.`,
                 async () => {
                     try {
-                        // First, delete all articles by this user
                         const articlesToDeleteSnapshot = await firestore.collection('articles').where('authorId', '==', userId).get();
                         const deleteArticlePromises = [];
                         articlesToDeleteSnapshot.forEach(doc => {
@@ -1595,13 +1506,12 @@ const firebaseConfig = {
                         });
                         await Promise.all(deleteArticlePromises);
 
-                        // Then, delete the user's profile from Firestore
                         await firestore.collection('users').doc(userId).delete();
 
-                        // To delete the user from Firebase Authentication, you NEED the Admin SDK on a secure server.
+                        // IMPORTANT: To delete the user from Firebase Authentication, you NEED the Admin SDK on a secure server.
                         // This client-side code CANNOT delete a Firebase Auth user directly.
                         showAdminMessage('warning', 'חשבון המשתמש וכתבותיו נמחקו מה-Firestore. יש למחוק את המשתמש מ-Firebase Authentication באופן ידני או דרך שרת.', 'single-user-admin-message');
-                        window.location.hash = '#manage-users'; // Go back to user list
+                        window.location.hash = '#manage-users';
                     } catch (error) {
                         console.error('שגיאה במחיקת משתמש:', error);
                         showAdminMessage('error', `שגיאה במחיקת משתמש: ${error.message}.`, 'single-user-admin-message');
@@ -1610,7 +1520,7 @@ const firebaseConfig = {
             );
         }
 
-        // --- Admin Actions (Admins) ---
+        // --- Admin Actions (Admins - now managed via Firestore + Auth) ---
         async function handleAddAdmin(event) {
             event.preventDefault();
             const form = event.target;
@@ -1619,76 +1529,62 @@ const firebaseConfig = {
                 return;
             }
 
-            const adminId = document.getElementById('new-admin-id').value.trim();
-            const adminPassword = document.getElementById('new-admin-password').value;
-            const passwordHash = btoa(adminPassword); // Simple Base64 encoding for "hashing"
+            const email = document.getElementById('new-admin-email').value.trim();
+            const displayName = document.getElementById('new-admin-display-name').value.trim();
 
             try {
-                await rtdb.ref('admins').child(adminId).set({
-                    passwordHash: passwordHash,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                // First, check if a user with this email exists in Firebase Authentication
+                // NOTE: Client-side SDK cannot directly get a user by email for security.
+                // A better approach in a real app would be Cloud Functions or Admin SDK on a server.
+                // For this client-side panel, we assume the user exists and try to fetch their Firestore 'users' profile.
+                const userDoc = await firestore.collection('users').where('email', '==', email).limit(1).get();
+
+                if (userDoc.empty) {
+                    showAdminMessage('error', 'לא נמצא משתמש רשום עם אימייל זה ב-Firestore. וודא שהמשתמש קיים ב-Firebase Authentication וגם בקולקציית "users" שלך.', 'manage-admins-message');
+                    return;
+                }
+
+                const userAuthId = userDoc.docs[0].id; // Get the UID from the Firestore user doc
+
+                // Add the user's UID to the 'admins' collection in Firestore
+                await firestore.collection('admins').doc(userAuthId).set({
+                    email: email,
+                    displayName: displayName,
+                    addedBy: currentAdminUser.uid,
+                    addedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                showAdminMessage('success', `מנהל "${adminId}" נוסף בהצלחה!`, 'manage-admins-message');
+                showAdminMessage('success', `משתמש "${displayName}" (UID: ${userAuthId}) הוגדר כמנהל בהצלחה!`, 'manage-admins-message');
                 form.reset();
-                addValidationListeners(form); // Re-apply listeners if needed after reset
-                loadManageAdminsPage(); // Refresh the list
+                addValidationListeners(form);
+                loadManageAdminsPage();
             } catch (error) {
                 console.error('שגיאה בהוספת מנהל:', error);
                 showAdminMessage('error', `שגיאה בהוספת מנהל: ${error.message}.`, 'manage-admins-message');
             }
         }
 
-        function confirmAdminDelete(adminId) {
-            showAdminConfirmationModal(
-                `האם אתה בטוח שברצונך למחוק את המנהל "${adminId}"? פעולה זו בלתי הפיכה.`,
-                () => deleteAdmin(adminId)
-            );
-        }
-
-        async function deleteAdmin(adminId) {
-            if (currentAdminUser && adminId === currentAdminUser.id) {
+        function confirmAdminDelete(adminUid, adminDisplayName) {
+            if (currentAdminUser && adminUid === currentAdminUser.uid) {
                 showAdminMessage('error', 'לא ניתן למחוק את המנהל המחובר כרגע.', 'manage-admins-message');
                 return;
             }
+            showAdminConfirmationModal(
+                `האם אתה בטוח שברצונך להסיר את הרשאת המנהל עבור "${adminDisplayName}"? משתמש זה לא יוכל יותר לגשת לפאנל.`,
+                () => deleteAdmin(adminUid)
+            );
+        }
+
+        async function deleteAdmin(adminUid) {
             try {
-                await rtdb.ref('admins').child(adminId).remove();
-                showAdminMessage('success', `מנהל "${adminId}" נמחק בהצלחה!`, 'manage-admins-message');
-                loadManageAdminsPage(); // Refresh the list
+                await firestore.collection('admins').doc(adminUid).delete();
+                showAdminMessage('success', `הרשאת המנהל עבור ${adminUid} הוסרה בהצלחה!`, 'manage-admins-message');
+                loadManageAdminsPage();
             } catch (error) {
                 console.error('שגיאה במחיקת מנהל:', error);
                 showAdminMessage('error', `שגיאה במחיקת מנהל: ${error.message}.`, 'manage-admins-message');
             }
         }
-
-        function resetAdminPasswordPrompt(adminId) {
-            showAdminConfirmationModal(
-                `הזן סיסמה חדשה עבור המנהל "${adminId}":<br><input type="password" id="new-admin-reset-password" placeholder="סיסמה חדשה" required style="margin-top: 10px; width: 100%;">`,
-                async () => {
-                    const newPassword = document.getElementById('new-admin-reset-password').value;
-                    if (newPassword.length < 6) { // Basic validation
-                        showAdminMessage('error', 'הסיסמה החדשה חייבת להיות לפחות 6 תווים.', 'manage-admins-message');
-                        return;
-                    }
-                    await resetAdminPassword(adminId, newPassword);
-                },
-                null, // No specific cancel callback needed
-                'אפס סיסמה'
-            );
-        }
-
-        async function resetAdminPassword(adminId, newPassword) {
-            try {
-                const newPasswordHash = btoa(newPassword); // Simple Base64 encoding
-                await rtdb.ref('admins').child(adminId).update({
-                    passwordHash: newPasswordHash
-                });
-                showAdminMessage('success', `סיסמת המנהל "${adminId}" אופסה בהצלחה!`, 'manage-admins-message');
-                loadManageAdminsPage(); // Refresh the list
-            } catch (error) {
-                console.error('שגיאה באיפוס סיסמת מנהל:', error);
-                showAdminMessage('error', `שגיאה באיפוס סיסמת מנהל: ${error.message}.`, 'manage-admins-message');
-            }
-        }
+        // Removed resetAdminPasswordPrompt/resetAdminPassword functions as Firebase Auth manages passwords
 
         // --- General Form Validation for Admin Panel ---
         function addValidationListeners(form) {
@@ -1718,22 +1614,15 @@ const firebaseConfig = {
             });
         }
 
-
         // --- Routing and Initialization ---
         function handleAdminHashChange() {
-            const hash = window.location.hash;
-            const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
-
-            // Check if admin is logged in before allowing access to internal pages
-            if (sessionStorage.getItem('adminLoggedIn') !== 'true') {
-                // If not logged in, force check admin login process
-                checkAdminLogin(hash);
-                return;
+            // Only proceed if currentAdminUser is set (meaning an admin is logged in)
+            if (!currentAdminUser) {
+                return; // The onAuthStateChanged listener will handle redirection to login
             }
 
-            adminHeader.style.display = 'flex';
-            adminContainer.style.display = 'flex';
-            adminDisplayName.textContent = sessionStorage.getItem('currentAdminDisplayName');
+            const hash = window.location.hash;
+            const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
 
             if (hash.startsWith('#manage-articles')) {
                 const searchTerm = urlParams.get('search') || '';
@@ -1758,25 +1647,28 @@ const firebaseConfig = {
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Initial check for admin login status and hash
-            handleAdminHashChange();
+            // Initial check for admin login status (this will also show loading screen)
+            checkAdminLoginState();
 
             // Attach event listeners
             adminLogoutBtn.addEventListener('click', adminLogout);
             document.querySelectorAll('#admin-sidebar .sidebar-item').forEach(item => {
                 item.addEventListener('click', (e) => {
-                    e.preventDefault(); // Prevent default hash change
+                    e.preventDefault();
                     window.location.hash = item.getAttribute('href');
                 });
             });
 
-            // Handle hash change events
-            window.addEventListener('hashchange', handleAdminHashChange);
+            // Handle hash change events (after initial state is determined by onAuthStateChanged)
+            window.addEventListener('hashchange', () => {
+                if (currentAdminUser) { // Only handle hash changes if an admin is already logged in
+                    handleAdminHashChange();
+                }
+                // If not logged in, onAuthStateChanged should handle it (by showing login)
+            });
 
-            // Hide loading screen after everything is initialized
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 1000); // Small delay to ensure content loads
+            // Hide loading screen initially for rapid display if auth state is quickly resolved
+            // This is managed within checkAdminLoginState now, setting it to none there.
         });
     </script>
 </body>
