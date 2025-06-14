@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - דף לא נמצא</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-color: #ff0000;
+            --text-color: #333;
+            --background-color: #f0f2f5;
+            --white: #fff;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background-color);
+            margin: 0;
+            overflow: hidden;
+            color: var(--text-color);
+            text-align: center;
+            direction: rtl; /* Right-to-left for Hebrew */
+            perspective: 1200px; /* For 3D effects */
+        }
+
+        .container {
+            padding: 30px;
+            border-radius: 15px;
+            background-color: var(--white);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            max-width: 650px;
+            width: 95%;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            animation: wobble 3s infinite alternate;
+        }
+
+        .logo {
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .logo img {
+            max-width: 180px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 9em;
+            color: var(--brand-color);
+            margin: 0;
+            line-height: 1;
+            text-shadow: 6px 6px 15px rgba(0, 0, 0, 0.15);
+            animation: glitch 1s infinite alternate, bounceIn 1s ease-out forwards;
+        }
+
+        h2 {
+            font-size: 2.8em;
+            color: var(--text-color);
+            margin-top: 15px;
+            margin-bottom: 25px;
+            animation: slideInUp 1s ease-out forwards, glitch 1.5s infinite alternate;
+            animation-delay: 0.3s;
+        }
+
+        p {
+            font-size: 1.3em;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-out forwards;
+            animation-delay: 0.6s;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 1s ease-out forwards;
+            animation-delay: 0.9s;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 1.2em;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: var(--brand-color);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--white);
+            color: var(--brand-color);
+            border-color: var(--brand-color);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-secondary {
+            background-color: var(--white);
+            color: var(--brand-color);
+            border-color: var(--brand-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--brand-color);
+            color: var(--white);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Background Distort Effect */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            bottom: -50px;
+            background: url('https://i.postimg.cc/rmXZ3q1Z/noise.png'); /* Replace with a subtle noise texture */
+            background-size: cover;
+            opacity: 0.15;
+            animation: pulse 5s infinite alternate;
+            z-index: 0;
+        }
+
+        /* Keyframe Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes wobble {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(1deg); }
+            100% { transform: rotate(-1deg); }
+        }
+
+}
+
+        @keyframes pulse {
+            0% { opacity: 0.15; transform: scale(1); }
+            100% { opacity: 0.3; transform: scale(1.05); }
+        }
+
+        @media (min-width: 768px) {
+            .button-group {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://i.postimg.cc/Zq1wqMBP/2.png" alt="לוגו האתר">
+        </div>
+        <h1>404</h1>
+        <h2>הדף שחיפשת לא נמצא</h2>
+        <div class="button-group">
+            <a href="/" class="btn btn-primary">חזרה לעמוד הבית</a>
+        </div>
+    </div>
+</body>
+</html>
