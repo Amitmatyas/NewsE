@@ -19,7 +19,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: var(--background-color);
+            background-color: #d3d3d3; /* Changed background color to light gray */
             margin: 0;
             overflow: hidden;
             color: var(--text-color);
@@ -125,21 +125,6 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
         }
 
-        /* Background Distort Effect */
-        body::before {
-            content: '';
-            position: absolute;
-            top: -50px;
-            left: -50px;
-            right: -50px;
-            bottom: -50px;
-            background: url('https://i.postimg.cc/rmXZ3q1Z/noise.png'); /* Replace with a subtle noise texture */
-            background-size: cover;
-            opacity: 0.15;
-            animation: pulse 5s infinite alternate;
-            z-index: 0;
-        }
-
         /* Keyframe Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -180,8 +165,6 @@
             50% { transform: rotate(1deg); }
             100% { transform: rotate(-1deg); }
         }
-
-}
 
         @keyframes pulse {
             0% { opacity: 0.15; transform: scale(1); }
