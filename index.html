@@ -1088,12 +1088,41 @@ async function handleAdminLogin(email, password, form) {
         setTimeout(() => { window.location.hash = ''; }, 1000);
     } catch (error) {
         console.error("Error during admin login:", error);
-
         if (error.code === 'auth/user-disabled') {
-            showMessage('error', 'חשבונך נחסם.', 'admin-login-message');
+            showMessage('error', 'חשבונך נחסם.', 'login-message');
         } else {
-            showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-login-message');
+            showMessage('error', `שגיאת התחברות: ${error.message}.`, 'login-message');
         }
+    }
+}
+
+function showMessage(type, text, targetId) {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    target.textContent = text;
+
+    if (type === 'error') {
+        target.style.backgroundColor = '#f8d7da'; // אדום בהיר
+        target.style.color = '#721c24';           // אדום כהה
+        target.style.border = '1px solid #f5c6cb';
+    } else if (type === 'success') {
+        target.style.backgroundColor = '#d4edda'; // ירוק בהיר
+        target.style.color = '#155724';            // ירוק כהה
+        target.style.border = '1px solid #c3e6cb';
+    } else {
+        target.style.backgroundColor = '';
+        target.style.color = '';
+        target.style.border = '';
+    }
+
+    target.style.display = text ? 'block' : 'none';
+
+    // אפשרות להסתיר אוטומטית אחרי 5 שניות אם יש טקסט
+    if (text) {
+        setTimeout(() => {
+            target.style.display = 'none';
+        }, 5000);
     }
 }
 
