@@ -280,7 +280,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script type="text/babel" data-presets="typescript,react">
-        // Interfaces for typing, these should be fine with the typescript preset
+        // Interfaces for typing
         interface PikudHaOrefAlertsProps {
             jsonUrl: string;
             interval: number;
@@ -309,7 +309,6 @@
 
         class PikudHaOrefAlerts extends React.Component<PikudHaOrefAlertsProps, PikudHaOrefAlertsState> {
             static siteScriptName = "PikudHaOrefAlerts"; 
-            // Removed 'private' keyword for direct browser Babel compatibility
             intervalId: number | null = null;
             hideAlertTimeout: number | null = null; 
 
@@ -522,11 +521,14 @@
             }
         }
 
-        // Render the React component into the root div
-        ReactDOM.render(
-            <PikudHaOrefAlerts jsonUrl="https://www.oref.org.il/Shared/Ajax/Get.aspx?lang=he&feeder=PikudHaoref" interval={5000} />,
-            document.getElementById('root')
-        );
+        // Wait for the DOM to be fully loaded before rendering the React component
+        // This ensures React and ReactDOM are definitely available.
+        $(document).ready(function() {
+            ReactDOM.render(
+                <PikudHaOrefAlerts jsonUrl="https://www.oref.org.il/Shared/Ajax/Get.aspx?lang=he&feeder=PikudHaoref" interval={5000} />,
+                document.getElementById('root')
+            );
+        });
     </script>
 </body>
 </html>
