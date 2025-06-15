@@ -279,11 +279,7 @@
     <div id="root"></div>
 
     <script type="text/babel" data-presets="typescript,react">
-        // Remove the 'declare var $: JQueryStatic;' line as it's TypeScript specific
-        // and not needed when running Babel with the TypeScript preset directly in browser for this simple use case.
-        // If you were using a local TypeScript setup with a build step, you'd keep it.
-
-        // Interfaces as defined in your original code
+        // Interfaces for typing, these should be fine with the typescript preset
         interface PikudHaOrefAlertsProps {
             jsonUrl: string;
             interval: number;
@@ -311,12 +307,10 @@
         }
 
         class PikudHaOrefAlerts extends React.Component<PikudHaOrefAlertsProps, PikudHaOrefAlertsState> {
-            // These properties need to be moved inside the constructor or made regular properties
-            // or you need to specifically configure Babel for class properties if not already done.
-            // For simplicity and direct browser Babel usage, let's adjust them.
-            static siteScriptName = "PikudHaOrefAlerts"; // Make it a plain static property
-            private intervalId: number | null = null;
-            private hideAlertTimeout: number | null = null; // Timeout for alert disappearance animation
+            static siteScriptName = "PikudHaOrefAlerts"; 
+            // Removed 'private' keyword for direct browser Babel compatibility
+            intervalId: number | null = null;
+            hideAlertTimeout: number | null = null; 
 
             constructor(props: PikudHaOrefAlertsProps) {
                 super(props);
@@ -332,20 +326,17 @@
 
             componentDidMount() {
                 const { jsonUrl, interval } = this.props;
-                if (typeof $ === 'undefined') { // Check if jQuery is loaded
+                if (typeof $ === 'undefined') { 
                     console.error("jQuery is not loaded.");
                     return;
                 }
 
-                // Initial fetch
                 this.sendPikudHaorefAjax(jsonUrl);
 
-                // Set up interval for subsequent fetches
                 this.intervalId = setInterval(() => { this.sendPikudHaorefAjax(jsonUrl); }, interval);
 
-                // Error handling for jQuery AJAX
                 $(window).error(function () {
-                    return true; // Suppress errors
+                    return true; 
                 });
             }
 
@@ -358,17 +349,17 @@
                 }
             }
 
-            private missileAlertsCharsEsc = (str: string | undefined): string => {
+            missileAlertsCharsEsc = (str: string | undefined): string => {
                 if (str) {
                     return str
-                        .replace(/\n/g, '<br/>') // Replace newline with HTML break for display
-                        .replace(/'/g, "&#39;") // Escaping single quote
-                        .replace(/"/g, "&quot;"); // Escaping double quote
+                        .replace(/\n/g, '<br/>') 
+                        .replace(/'/g, "&#39;") 
+                        .replace(/"/g, "&quot;"); 
                 }
                 return '';
             };
 
-            private sendPikudHaorefAjax = (url: string) => {
+            sendPikudHaorefAjax = (url: string) => {
                 if (!url || typeof $ === 'undefined') return;
 
                 $.ajax({
@@ -389,34 +380,29 @@
                                 const latestAlertGuid = items[0].item.guid;
 
                                 if (this.state.missileAlertsIdSaver !== latestAlertGuid) {
-                                    // New alert detected
                                     this.setState(prevState => ({
                                         currentAlerts: items,
                                         missileAlertsIdSaver: latestAlertGuid,
-                                        isAlertActive: true, // Activate animation
+                                        isAlertActive: true, 
                                         alertHistory: [
                                             { item: items[0].item, timestamp: new Date() },
-                                            ...prevState.alertHistory.filter(historyItem => historyItem.item.guid !== latestAlertGuid) // Avoid duplicates in history
+                                            ...prevState.alertHistory.filter(historyItem => historyItem.item.guid !== latestAlertGuid) 
                                         ]
-                                        .filter(item => (new Date().getTime() - item.timestamp.getTime()) < 3600000) // Keep alerts from last hour (3600000 ms)
-                                        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()) // Sort by latest
+                                        .filter(item => (new Date().getTime() - item.timestamp.getTime()) < 3600000) 
+                                        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()) 
                                     }));
 
-                                    // Clear any previous hide timeout
                                     if (this.hideAlertTimeout) {
                                         clearTimeout(this.hideAlertTimeout);
                                     }
-                                    // Set timeout to hide alert after 10 seconds (for animation)
                                     this.hideAlertTimeout = setTimeout(() => {
-                                        this.setState({ isAlertActive: false }); // Start fade-out animation
-                                        // After animation, clear the alert from currentAlerts
+                                        this.setState({ isAlertActive: false }); 
                                         setTimeout(() => {
                                             this.setState({ currentAlerts: [] });
-                                        }, 500); // Match animation duration
-                                    }, 10000); // 10 seconds display time
+                                        }, 500); 
+                                    }, 10000); 
                                 }
                             } else {
-                                // No active alerts
                                 this.setState({ currentAlerts: [], missileAlertsIdSaver: null, isAlertActive: false });
                                 if (this.hideAlertTimeout) {
                                     clearTimeout(this.hideAlertTimeout);
@@ -424,7 +410,6 @@
                                 }
                             }
                         } else {
-                            // No alerts data
                             this.setState({ currentAlerts: [], missileAlertsIdSaver: null, isAlertActive: false });
                             if (this.hideAlertTimeout) {
                                 clearTimeout(this.hideAlertTimeout);
@@ -440,23 +425,22 @@
                 });
             };
 
-            private closeAlert = () => {
+            closeAlert = () => {
                 if (this.hideAlertTimeout) {
                     clearTimeout(this.hideAlertTimeout);
                     this.hideAlertTimeout = null;
                 }
-                this.setState({ isAlertActive: false }); // Start fade-out animation
-                // After animation, clear the alert from currentAlerts
+                this.setState({ isAlertActive: false }); 
                 setTimeout(() => {
                     this.setState({ currentAlerts: [] });
-                }, 500); // Match animation duration
+                }, 500); 
             };
 
-            private showHoveredItem = (item: alertIteminArray | null) => {
+            showHoveredItem = (item: alertIteminArray | null) => {
                 this.setState({ hoveredItem: item });
             };
 
-            private formatAlertTime = (date: Date): string => {
+            formatAlertTime = (date: Date): string => {
                 const hours = date.getHours().toString().padStart(2, '0');
                 const minutes = date.getMinutes().toString().padStart(2, '0');
                 return `${hours}:${minutes}`;
@@ -465,7 +449,7 @@
             render() {
                 const { currentAlerts, hoveredItem, pikudHaorefTitle, alertHistory, isAlertActive } = this.state;
                 const alertDescriptionOpenClass = hoveredItem !== null ? "open" : "";
-                const alertAnimationClass = currentAlerts.length > 0 && isAlertActive ? "" : "hiding"; // Apply hiding class for fade out
+                const alertAnimationClass = currentAlerts.length > 0 && isAlertActive ? "" : "hiding"; 
 
                 return (
                     <React.Fragment>
@@ -494,7 +478,7 @@
                                             <ul className="areas">
                                                 {currentAlerts.map((item, i) => (
                                                     <li
-                                                        key={item.item.guid || i} // Use guid for a stable key, fallback to index
+                                                        key={item.item.guid || i} 
                                                         onMouseEnter={() => this.showHoveredItem(item)}
                                                         onMouseLeave={() => this.showHoveredItem(null)}
                                                     >
@@ -539,10 +523,6 @@
 
         // Render the React component into the root div
         ReactDOM.render(
-            // Use a valid JSONP URL for testing. The one you provided earlier might be incorrect or require specific handling.
-            // Example:
-            // <PikudHaOrefAlerts jsonUrl="https://example.com/your-pikud-haoref-jsonp-feed" interval={5000} />,
-            // For now, let's use a placeholder until you confirm the exact valid JSONP URL for Pikud HaOref.
             <PikudHaOrefAlerts jsonUrl="https://www.oref.org.il/Shared/Ajax/Get.aspx?lang=he&feeder=PikudHaoref" interval={5000} />,
             document.getElementById('root')
         );
