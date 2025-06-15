@@ -939,7 +939,7 @@ function base64Decode(str) {
                 }
             } catch (error) {
                 console.error("Error during admin login:", error);
-                showMessage('error', שגיאת התחברות: ${error.message}., 'admin-login-message');
+showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-login-message');
             }
         }
 
