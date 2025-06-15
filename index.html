@@ -1109,6 +1109,7 @@ async function handleLogout() {
 async function handleUpdateFullName(event) {
     event.preventDefault();
     const form = event.target;
+
     if (!form.checkValidity()) {
         form.reportValidity();
         form.querySelectorAll('input[required], textarea[required]').forEach(input => {
@@ -1120,25 +1121,29 @@ async function handleUpdateFullName(event) {
         });
         return;
     }
-}
-            if (!currentUser) return;
 
-            const newFullName = document.getElementById('edit-full-name-input').value;
-            try {
-                await db.collection('users').doc(currentUser.uid).update({
-                    fullName: newFullName
-                });
-                showMessage('success', 'השם המלא עודכן בהצלחה!', 'account-message');
-                document.getElementById('display-full-name').textContent = newFullName;
-                document.getElementById('edit-full-name-form').style.display = 'none';
-                document.getElementById('display-full-name').style.display = 'inline';
-                document.getElementById('edit-full-name-btn').style.display = 'inline';
-                form.querySelectorAll('.is-invalid').forEach(input => input.classList.remove('is-invalid')); // Clear invalid state
-            } catch (error) {
-                showMessage('error', `שגיאה בעדכון השם: ${error.message}`, 'account-message');
-                console.error("שגיאה בעדכון שם מלא:", error);
-            }
-        }
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const newFullName = document.getElementById('edit-full-name-input').value;
+
+    try {
+        await db.collection('users').doc(currentUser.uid).update({
+            fullName: newFullName
+        });
+
+        showMessage('success', 'השם המלא עודכן בהצלחה!', 'account-message');
+        document.getElementById('display-full-name').textContent = newFullName;
+        document.getElementById('edit-full-name-form').style.display = 'none';
+        document.getElementById('display-full-name').style.display = 'inline';
+        document.getElementById('edit-full-name-btn').style.display = 'inline';
+
+        form.querySelectorAll('.is-invalid').forEach(input => input.classList.remove('is-invalid'));
+    } catch (error) {
+        showMessage('error', `שגיאה בעדכון השם: ${error.message}`, 'account-message');
+        console.error("שגיאה בעדכון שם מלא:", error);
+    }
+}
 
         // --- Validation Helper Function ---
         function addValidationListeners(form) {
