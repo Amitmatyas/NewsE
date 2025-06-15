@@ -1082,10 +1082,15 @@
                 form.querySelectorAll('.is-invalid').forEach(input => input.classList.remove('is-invalid')); // Clear invalid state
                 setTimeout(() => { window.location.hash = ''; }, 1000); // Redirect to home after 1 second
 
-            } catch (error) {
-                showMessage('error', `שגיאת התחברות: ${error.message}`, 'login-message');
-            }
-        }
+} catch (error) {
+    console.error("Error during admin login:", error);
+    
+    if (error.code === 'auth/user-disabled') {
+        showMessage('error', 'חשבונך נחסם.', 'admin-login-message');
+    } else {
+        showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-login-message');
+    }
+}
 
         async function handleLogout() {
             try {
