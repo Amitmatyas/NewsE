@@ -1397,7 +1397,6 @@ showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-logi
 
                         <h4 style="margin-top: 30px;"><i class="fas fa-lock"></i> פעולות אבטחה</h4>
                         <div class="admin-action-group">
-                            <button class="action-btn" onclick="confirmResetUserPassword('${userId}', '${userData.email}')" style="background-color: var(--warning-color); color: white;"><i class="fas fa-key"></i> אפס סיסמת משתמש (דרך אימייל)</button>
                             <button class="${userData.isSuspended ? 'action-btn' : 'action-btn'}"
                                     onclick="${userData.isSuspended ? `confirmActivateUser('${userId}', '${userData.fullName || userData.email}')` : `confirmSuspendUser('${userId}', '${userData.fullName || userData.email}')`}"
                                     style="background-color: ${userData.isSuspended ? 'var(--success-color)' : 'var(--error-color)'}; color: white;">
@@ -1642,15 +1641,15 @@ function confirmResetUserPassword(userId, userEmail) {
                 const result = await resetPasswordFunction({ email: userEmail });
 
                 if (result.data.success) {
-                    showMessage('success', `אימייל איפוס סיסמה נשלח בהצלחה ל-${userEmail}.`, 'single-user-admin-message');
+                    showMessage('success', `אימייל  נשלח בהצלחה ל-${userEmail}.`, 'single-user-admin-message');
                 } else {
                     // טיפול בשגיאות מה-Cloud Function
-                    showMessage('error', `שגיאה בשליחת אימייל איפוס סיסמה: ${result.data.error || 'שגיאה לא ידועה'}.`, 'single-user-admin-message');
+                    showMessage('error', `שגיאה בשליחת אימייל : ${result.data.error || 'שגיאה לא ידועה'}.`, 'single-user-admin-message');
                     console.error("Cloud Function error:", result.data.error);
                 }
             } catch (error) {
-                console.error('שגיאה בקריאה לפונקציית הענן לאיפוס סיסמה:', error);
-                showMessage('error', `שגיאה בשליחת אימייל איפוס סיסמה: ${error.message}.`, 'single-user-admin-message');
+                console.error('שגיאה בקריאה לפונקציית הענן ל:', error);
+                showMessage('error', `שגיאה בשליחת אימייל : ${error.message}.`, 'single-user-admin-message');
             }
         }
         // --- סוף הפונקציה החדשה ---
