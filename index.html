@@ -1082,14 +1082,44 @@ async function handleLogin(event) {
 
 async function handleAdminLogin(email, password, form) {
     try {
-        await auth.signInWithEmailAndPassword(email, password);
+        // First, attempt to sign in the user with Firebase Authentication.
+        // This handles cases like wrong password, user not found, etc.
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        // If login is successful, now check if the user is suspended in Firestore.
+        const userDoc = await db.collection('users').doc(user.uid).get();
+
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            if (userData.isSuspended === true) {
+                // If suspended, immediately sign them out
+                await auth.signOut();
+                showMessage('error', 'חשבונך נחסם.', 'login-message');
+                return; // Stop further execution
+            }
+        } else {
+            // This case is less likely if signup worked correctly, but handles missing user doc
+            console.warn("User document not found for logged-in user:", user.uid);
+            await auth.signOut(); // For safety, log them out if user doc is missing
+            showMessage('error', 'שגיאה בטעינת פרטי המשתמש. אנא צור קשר עם התמיכה.', 'login-message');
+            return;
+        }
+
+        // If not suspended, proceed with successful login actions
         showMessage('success', 'התחברת בהצלחה!', 'login-message');
         form.querySelectorAll('.is-invalid').forEach(input => input.classList.remove('is-invalid'));
         setTimeout(() => { window.location.hash = ''; }, 1000);
+
     } catch (error) {
-        console.error("Error during admin login:", error);
+        console.error("Error during login:", error);
         if (error.code === 'auth/user-disabled') {
-            showMessage('error', 'חשבונך נחסם.', 'login-message');
+            // This error code from Firebase Auth directly means the user is disabled.
+            // Firestore check is a custom 'isSuspended' flag, whereas 'user-disabled'
+            // is a direct Firebase authentication state. We should show this specific message.
+            showMessage('error', 'חשבונך נחסם על ידי המערכת.', 'login-message');
+        } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            showMessage('error', 'שילוב אימייל/סיסמה שגוי.', 'login-message');
         } else {
             showMessage('error', `שגיאת התחברות: ${error.message}.`, 'login-message');
         }
