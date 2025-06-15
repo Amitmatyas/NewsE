@@ -1628,19 +1628,32 @@ showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-logi
             }
         }
 
-        function confirmResetUserPassword(userId, userEmail) {
-            // Note: Firebase client SDK does not allow direct password reset for other users.
-            // This would typically involve Firebase Authentication sendPasswordResetEmail
-            // which requires the email to be linked to an authenticated user.
-            // For a production app, this would be a Firebase Cloud Function.
+function confirmResetUserPassword(userId, userEmail) {
             showAdminConfirmationModal(
-                `אזהרה: פעולת איפוס סיסמה עבור "${userEmail}" אינה נתמכת ישירות מהצד לקוח עבור משתמשים אחרים. נדרש פתרון שרת (כמו Firebase Cloud Functions) לשלוח אימייל איפוס סיסמה למשתמש.`,
-                () => { /* Do nothing, as direct reset is not possible */ },
-                () => { /* Do nothing on cancel */ },
-                'הבנתי',
-                'בטל'
+                `האם אתה בטוח שברצונך לשלוח אימייל איפוס סיסמה למשתמש "${userEmail}"?`,
+                () => sendPasswordResetEmailAdmin(userEmail) // קורא לפונקציה החדשה ששולחת דרך פונקציית הענן
             );
         }
+
+        // --- הוסף את הפונקציה החדשה הזו ישירות אחרי הפונקציה confirmResetUserPassword ---
+        async function sendPasswordResetEmailAdmin(userEmail) {
+            try {
+                const resetPasswordFunction = firebase.functions().httpsCallable('resetPasswordForUser'); // שם פונקציית הענן
+                const result = await resetPasswordFunction({ email: userEmail });
+
+                if (result.data.success) {
+                    showMessage('success', `אימייל איפוס סיסמה נשלח בהצלחה ל-${userEmail}.`, 'single-user-admin-message');
+                } else {
+                    // טיפול בשגיאות מה-Cloud Function
+                    showMessage('error', `שגיאה בשליחת אימייל איפוס סיסמה: ${result.data.error || 'שגיאה לא ידועה'}.`, 'single-user-admin-message');
+                    console.error("Cloud Function error:", result.data.error);
+                }
+            } catch (error) {
+                console.error('שגיאה בקריאה לפונקציית הענן לאיפוס סיסמה:', error);
+                showMessage('error', `שגיאה בשליחת אימייל איפוס סיסמה: ${error.message}.`, 'single-user-admin-message');
+            }
+        }
+        // --- סוף הפונקציה החדשה ---
 
 
         function confirmSuspendUser(userId, userName) {
