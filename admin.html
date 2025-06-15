@@ -943,7 +943,7 @@ function base64Decode(str) {
     if (error.code === 'auth/user-disabled') {
         showMessage('error', 'חשבונך נחסם.', 'admin-login-message');
     } else {
-        showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-login-message');
+        showMessage('error', `ניסיון`, 'admin-login-message');
     }
 }
 
