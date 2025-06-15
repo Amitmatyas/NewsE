@@ -1076,30 +1076,31 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                showMessage('success', 'התחברת בהצלחה!', 'login-message'); // Show success message
-                form.querySelectorAll('.is-invalid').forEach(input => input.classList.remove('is-invalid')); // Clear invalid state
-                setTimeout(() => { window.location.hash = ''; }, 1000); // Redirect to home after 1 second
+async function handleAdminLogin(email, password, form) {
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showMessage('success', 'התחברת בהצלחה!', 'login-message'); // Show success message
+        form.querySelectorAll('.is-invalid').forEach(input => input.classList.remove('is-invalid')); // Clear invalid state
+        setTimeout(() => { window.location.hash = ''; }, 1000); // Redirect to home after 1 second
+    } catch (error) {
+        console.error("Error during admin login:", error);
 
-} catch (error) {
-    console.error("Error during admin login:", error);
-    
-    if (error.code === 'auth/user-disabled') {
-        showMessage('error', 'חשבונך נחסם.', 'admin-login-message');
-    } else {
-        showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-login-message');
+        if (error.code === 'auth/user-disabled') {
+            showMessage('error', 'חשבונך נחסם.', 'admin-login-message');
+        } else {
+            showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-login-message');
+        }
     }
 }
 
-        async function handleLogout() {
-            try {
-                await auth.signOut();
-                window.location.hash = ''; // Go to home page (will reload as logged out)
-            } catch (error) {
-                console.error('שגיאת התנתקות:', error);
-            }
-        }
+async function handleLogout() {
+    try {
+        await auth.signOut();
+        window.location.hash = ''; // Go to home page (will reload as logged out)
+    } catch (error) {
+        console.error('שגיאת התנתקות:', error);
+    }
+}
 
         async function handleUpdateFullName(event) {
             event.preventDefault();
