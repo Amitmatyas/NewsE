@@ -1038,7 +1038,7 @@ showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-logi
                     </div>
                     <div class="stat-card">
                         <div class="icon"><i class="fas fa-users"></i></div>
-                        <div class="value" id="total-users-stat">-1</div>
+                        <div class="value" id="total-users-stat">0</div>
                         <div class="label">משתמשים רשומים</div>
                     </div>
                     <div class="stat-card">
@@ -1056,7 +1056,7 @@ showMessage('error', `שגיאת התחברות: ${error.message}.`, 'admin-logi
                 ]);
 
                 document.getElementById('total-articles-stat').textContent = articlesSnapshot.size;
-                document.getElementById('total-users-stat').textContent = usersSnapshot.size;
+                document.getElementById('total-users-stat').textContent = usersSnapshot.size - 1;
 
                 const adminArticles = articlesSnapshot.docs.filter(doc => doc.data().authorName === "מערכת NewsE");
                 document.getElementById('admin-articles-stat').textContent = adminArticles.length;
