@@ -937,15 +937,11 @@ function base64Decode(str) {
                 } else {
                     showMessage('error', 'סיסמה שגויה. נסה שוב.', 'admin-login-message');
                 }
-} catch (error) {
-    console.error("Error during admin login:", error);
-    
-    if (error.code === 'auth/user-disabled') {
-        showMessage('error', 'חשבונך נחסם.', 'admin-login-message');
-    } else {
-        showMessage('error', `ניסיון`, 'admin-login-message');
-    }
-}
+            } catch (error) {
+                console.error("Error during admin login:", error);
+                showMessage('error', שגיאת התחברות: ${error.message}., 'admin-login-message');
+            }
+        }
 
         function adminLogout() {
             sessionStorage.removeItem('loggedInAdminUser');
