@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsE - פאנל ניהול</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Add your existing CSS here, or link to an external stylesheet */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            direction: rtl; /* For Hebrew */
+            text-align: right;
+        }
+
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --border-color: #dee2e6;
+            --text-color: #343a40;
+            --light-text-color: #6c757d;
+            --header-background: #343a40;
+            --header-text-color: #ffffff;
+            --sidebar-background: #495057;
+            --sidebar-text-color: #ffffff;
+            --sidebar-hover-background: #6c757d;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --input-border: #ced4da;
+            --focus-border: #80bdff;
+            --invalid-border: #dc3545;
+            --invalid-bg: #fff0f0; /* Light red for invalid input background */
+        }
+
+        #admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        #admin-sidebar {
+            width: 250px;
+            background-color: var(--sidebar-background);
+            color: var(--sidebar-text-color);
+            padding: 20px;
+            box-shadow: 2px 0 5px var(--shadow-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Pushes logout to bottom */
+        }
+
+        #admin-sidebar h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        #admin-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1; /* Allows the list to take available space */
+        }
+
+        #admin-sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        #admin-sidebar ul li a {
+            display: block;
+            color: var(--sidebar-text-color);
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        #admin-sidebar ul li a:hover,
+        #admin-sidebar ul li a.active {
+            background-color: var(--sidebar-hover-background);
+            color: var(--header-text-color); /* Lighter text on hover */
+        }
+
+        #admin-sidebar ul li a i {
+            margin-left: 10px;
+        }
+
+        #admin-main-content {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #admin-header {
+            background-color: var(--header-background);
+            color: var(--header-text-color);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        #admin-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        #admin-header button {
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #admin-header button:hover {
+            background-color: #c82333; /* Darker red */
+        }
+
+        .admin-page-title {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 2em;
+            text-align: center;
+        }
+
+        .admin-page-title i {
+            margin-left: 10px;
+            color: var(--secondary-color);
+        }
+
+        .dashboard-stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--card-background);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            text-align: center;
+            min-width: 220px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .icon {
+            font-size: 3em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 1.1em;
+            color: var(--light-text-color);
+        }
+
+        .admin-form, #admin-create-article-form, #edit-user-form, #add-admin-manual-form {
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            max-width: 600px;
+            margin: 30px auto;
+            text-align: right;
+        }
+
+        .admin-form h3, #admin-create-article-form h4, #edit-user-form h4, #add-admin-manual-form h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .admin-form label, #admin-create-article-form label, #edit-user-form label, #add-admin-manual-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: bold;
+        }
+
+        .admin-form input[type="text"],
+        .admin-form input[type="password"],
+        .admin-form input[type="email"],
+        #admin-create-article-form input[type="text"],
+        #admin-create-article-form textarea,
+        #edit-user-form input[type="text"],
+        #edit-user-form input[type="email"],
+        #add-admin-manual-form input[type="text"],
+        #add-admin-manual-form input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            text-align: right;
+            direction: rtl;
+        }
+
+        .admin-form input[type="text"]:focus,
+        .admin-form input[type="password"]:focus,
+        .admin-form input[type="email"]:focus,
+        #admin-create-article-form input[type="text"]:focus,
+        #admin-create-article-form textarea:focus,
+        #edit-user-form input[type="text"]:focus,
+        #edit-user-form input[type="email"]:focus,
+        #add-admin-manual-form input[type="text"]:focus,
+        #add-admin-manual-form input[type="password"]:focus {
+            border-color: var(--focus-border);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        .admin-form input.is-invalid,
+        #admin-create-article-form input.is-invalid,
+        #admin-create-article-form textarea.is-invalid,
+        #edit-user-form input.is-invalid,
+        #add-admin-manual-form input.is-invalid {
+            border-color: var(--invalid-border);
+            background-color: var(--invalid-bg);
+        }
+
+        .admin-form button, #admin-create-article-form button, #edit-user-form button, #add-admin-manual-form button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .admin-form button:hover, #admin-create-article-form button:hover, #edit-user-form button:hover, #add-admin-manual-form button:hover {
+            background-color: #0056b3; /* Darker blue */
+        }
+
+        .message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        #admin-login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background-color);
+        }
+
+        #admin-login-screen .admin-form {
+            max-width: 450px;
+            width: 90%;
+            padding: 40px;
+        }
+
+        #admin-login-screen h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        #admin-login-screen .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #admin-login-screen .logo img {
+            max-width: 150px;
+            height: auto;
+        }
+
+        #admin-content-area {
+            flex-grow: 1;
+            padding: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: var(--primary-color);
+            z-index: 1000;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--card-background);
+            box-shadow: 0 2px 5px var(--shadow-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .admin-table thead tr {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: right;
+        }
+
+        .admin-table th, .admin-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-table th {
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        .admin-table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .admin-table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .action-buttons button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin-left: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-buttons button:hover {
+            opacity: 0.9;
+        }
+
+        .action-buttons .view-btn {
+            background-color: var(--info-color);
+        }
+        .action-buttons .view-btn:hover {
+            background-color: #117a8b;
+        }
+
+        .action-buttons .edit-btn {
+            background-color: var(--warning-color);
+            color: #333;
+        }
+        .action-buttons .edit-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .action-buttons .delete-btn {
+            background-color: var(--error-color);
+        }
+        .action-buttons .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .admin-search-bar {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+            direction: rtl; /* For Hebrew */
+        }
+
+        .admin-search-bar input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            font-size: 1em;
+            text-align: right;
+        }
+
+        .admin-search-bar button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            white-space: nowrap; /* Prevent button text from wrapping */
+        }
+
+        .admin-search-bar button:hover {
+            background-color: #0056b3;
+        }
+
+        .admin-single-detail p {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+
+        .admin-single-detail p i {
+            margin-left: 8px;
+            color: var(--secondary-color);
+        }
+
+        .article-content {
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .admin-action-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-start; /* Align buttons to the right for RTL */
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+
+        .admin-action-group button, .action-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: background-color 0.3s ease;
+        }
+
+        .admin-action-group button:hover, .action-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .user-status-active {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .user-status-suspended {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* Confirmation Modal */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1001; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #888;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            direction: rtl;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.5em;
+        }
+
+        .modal-content p {
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-buttons .confirm-btn {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .modal-buttons .confirm-btn:hover {
+            background-color: #c82333;
+        }
+
+        .modal-buttons .cancel-btn {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .modal-buttons .cancel-btn:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <i class="fas fa-spinner fa-spin"></i> טוען...
+    </div>
+
+    <div id="admin-login-screen">
+        <div class="admin-form">
+            <div class="logo">
+                <img src="https://via.placeholder.com/150" alt="NewsE Logo"> </div>
+            <h2>ברוכים הבאים לפאנל הניהול</h2>
+            <div id="admin-login-message" class="message"></div>
+            <form id="admin-login-form">
+                <input type="text" id="admin-username" placeholder="שם משתמש" required>
+                <input type="password" id="admin-password" placeholder="סיסמה" required>
+                <button type="submit"><i class="fas fa-sign-in-alt"></i> התחבר</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-container">
+        <div id="admin-sidebar">
+            <h1>NewsE Admin</h1>
+            <ul>
+                <li><a href="#dashboard" class="sidebar-item"><i class="fas fa-tachometer-alt"></i> לוח בקרה</a></li>
+                <li><a href="#manage-articles" class="sidebar-item"><i class="fas fa-newspaper"></i> ניהול כתבות</a></li>
+                <li><a href="#create-article" class="sidebar-item"><i class="fas fa-pen-nib"></i> צור כתבה</a></li>
+                <li><a href="#manage-users" class="sidebar-item"><i class="fas fa-users-cog"></i> ניהול משתמשים</a></li>
+                <li id="manage-admins-sidebar-item" style="display:none;"><a href="#manage-admins" class="sidebar-item"><i class="fas fa-user-shield"></i> ניהול מנהלים</a></li>
+            </ul>
+            <button id="admin-logout-btn"><i class="fas fa-sign-out-alt"></i> התנתק</button>
+        </div>
+        <div id="admin-main-content">
+            <div id="admin-header">
+                <h2 id="current-admin-page-title"></h2>
+                <div>שלום, <span id="logged-in-admin-username">מנהל</span>!</div>
+            </div>
+            <div id="admin-content-area">
+                </div>
+        </div>
+    </div>
+
+    <div id="adminConfirmationModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalConfirmTitle">אישור פעולה</h3>
+            <p id="modalConfirmMessage"></p>
+            <div class="modal-buttons">
+                <button class="confirm-btn" id="modalConfirmBtn">אשר</button>
+                <button class="cancel-btn" id="modalCancelBtn">בטל</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const firestore = firebase.firestore();
+
+        // Global variables for admin session
+        let currentAdminUserHash = sessionStorage.getItem('currentAdminUserHash'); // Stores the base64 encoded username
+        const ADMIN_DISPLAY_NAME_FIXED = "מערכת NewsE"; // For articles created by the admin panel
+
+        // DOM elements
+        const adminLoginScreen = document.getElementById('admin-login-screen');
+        const adminContainer = document.getElementById('admin-container');
+        const adminContentArea = document.getElementById('admin-content-area');
+        const loggedInAdminUsernameSpan = document.getElementById('logged-in-admin-username');
+        const adminLogoutBtn = document.getElementById('admin-logout-btn');
+        const loadingScreen = document.getElementById('loading-screen');
+        const manageAdminsSidebarItem = document.getElementById('manage-admins-sidebar-item');
+
+        // Confirmation Modal elements
+        const adminConfirmationModal = document.getElementById('adminConfirmationModal');
+        const modalConfirmTitle = document.getElementById('modalConfirmTitle');
+        const modalConfirmMessage = document.getElementById('modalConfirmMessage');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+        // --- Utility Functions ---
+        function showMessage(type, message, elementId) {
+            const messageDiv = document.getElementById(elementId);
+            if (messageDiv) {
+                messageDiv.textContent = message;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                    messageDiv.textContent = '';
+                }, 5000); // Hide after 5 seconds
+            }
+        }
+
+        function base64Encode(str) {
+            return btoa(str);
+        }
+
+        function base64Decode(str) {
+            return atob(str);
+        }
+
+        function renderAdminContent(html) {
+            adminContentArea.innerHTML = html;
+            // Update active sidebar item
+            const hash = window.location.hash.split('?')[0];
+            document.querySelectorAll('#admin-sidebar .sidebar-item').forEach(item => {
+                if (item.getAttribute('href').split('?')[0] === hash) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function showAdminConfirmationModal(message, onConfirm, onCancel = () => {}, confirmText = 'אשר', cancelText = 'בטל') {
+            modalConfirmMessage.textContent = message;
+            modalConfirmBtn.textContent = confirmText;
+            modalCancelBtn.textContent = cancelText;
+
+            // Clear previous listeners
+            modalConfirmBtn.onclick = null;
+            modalCancelBtn.onclick = null;
+
+            modalConfirmBtn.onclick = () => {
+                adminConfirmationModal.style.display = 'none';
+                onConfirm();
+            };
+            modalCancelBtn.onclick = () => {
+                adminConfirmationModal.style.display = 'none';
+                onCancel();
+            };
+            adminConfirmationModal.style.display = 'flex';
+        }
+
+        // --- Admin Login/Logout ---
+        async function checkAdminAccess() {
+            loadingScreen.style.display = 'flex';
+            const usernameFromHash = window.location.hash.split('/')[1]; // Expecting #admin/username
+            const storedAdminHash = sessionStorage.getItem('isAdminLoggedIn'); // This stores the actual username in base64 if logged in
+
+            if (storedAdminHash) {
+                loggedInAdminUsernameSpan.textContent = base64Decode(storedAdminHash);
+                adminLoginScreen.style.display = 'none';
+                adminContainer.style.display = 'flex';
+                adminContentArea.style.display = 'block';
+
+                // Condition for showing 'ניהול מנהלים' based on specific usernames
+                const loggedInUsername = base64Decode(storedAdminHash);
+                if (['NewsE', 'AmitMatyas', 'Admin'].includes(loggedInUsername)) {
+                    manageAdminsSidebarItem.style.display = 'list-item';
+                } else {
+                    manageAdminsSidebarItem.style.display = 'none';
+                }
+
+                handleAdminHashChange(); // Load the appropriate page
+            } else {
+                adminLoginScreen.style.display = 'flex';
+                adminContainer.style.display = 'none';
+                adminContentArea.style.display = 'none';
+                manageAdminsSidebarItem.style.display = 'none'; // Hide if not logged in
+                window.location.hash = ''; // Clear hash if not logged in
+                showMessage('error', 'נדרשת התחברות למערכת הניהול.', 'admin-login-message');
+            }
+            loadingScreen.style.display = 'none';
+        }
+
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const username = document.getElementById('admin-username').value.trim();
+            const password = document.getElementById('admin-password').value;
+            const messageDiv = document.getElementById('admin-login-message');
+
+            if (!username || !password) {
+                showMessage('error', 'אנא הזן שם משתמש וסיסמה.', 'admin-login-message');
+                return;
+            }
+
+            try {
+                const adminDocRef = firestore.collection('admins').doc(username);
+                const adminDoc = await adminDocRef.get();
+
+                if (!adminDoc.exists) {
+                    showMessage('error', 'שם משתמש או סיסמה שגויים.', 'admin-login-message');
+                    return;
+                }
+
+                const adminData = adminDoc.data();
+                const storedPasswordHash = adminData.passwordHash;
+
+                if (base64Encode(password) === storedPasswordHash) { // Basic comparison for demonstration
+                    sessionStorage.setItem('isAdminLoggedIn', base64Encode(username));
+                    currentAdminUserHash = base64Encode(username); // Set global var
+                    showMessage('success', `ברוך הבא, ${username}!`, 'admin-login-message');
+                    window.location.hash = '#dashboard'; // Redirect to dashboard
+                } else {
+                    showMessage('error', 'שם משתמש או סיסמה שגויים.', 'admin-login-message');
+                }
+            } catch (error) {
+                console.error("שגיאה בהתחברות מנהל:", error);
+                showMessage('error', `שגיאה בהתחברות: ${error.message}.`, 'admin-login-message');
+            }
+        }
+
+        function adminLogout() {
+            sessionStorage.removeItem('isAdminLoggedIn');
+            currentAdminUserHash = null; // Clear global var
+            window.location.hash = ''; // Go back to login screen
+            checkAdminAccess(); // Re-evaluate access
+        }
+
+        // --- Admin Actions (Admins - now managed via Firestore) ---
+        async function handleAddNewAdmin(event) { // This function seems redundant based on your request, but I will keep it for now.
+            event.preventDefault();
+            const form = event.target;
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const username = document.getElementById('new-admin-name').value.trim();
+            const password = document.getElementById('new-admin-password-manual').value;
+            const confirmPassword = document.getElementById('new-admin-password-confirm-manual').value;
+            const messageDiv = document.getElementById('manage-admins-message');
+
+            if (password.length < 6) {
+                showMessage('error', 'הסיסמה חייבת להיות באורך 6 תווים לפחות.', 'manage-admins-message');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showMessage('error', 'הסיסמאות אינן תואמות.', 'manage-admins-message');
+                return;
+            }
+
+            try {
+                const adminDocRef = firestore.collection('admins').doc(username);
+                const adminDoc = await adminDocRef.get();
+
+                if (adminDoc.exists) {
+                    showMessage('error', `שם המנהל "${username}" כבר קיים. אנא בחר שם אחר.`, 'manage-admins-message');
+                    return;
+                }
+
+                await adminDocRef.set({
+                    passwordHash: base64Encode(password), // INSECURE FOR PRODUCTION! Use proper hashing on backend.
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showMessage('success', `מנהל "${username}" נוסף בהצלחה!`, 'manage-admins-message');
+                form.reset();
+                addValidationListeners(form); // Re-add listeners after reset
+                loadManageAdminsPage(); // Reload the list of admins
+            } catch (error) {
+                console.error('שגיאה בהוספת מנהל:', error);
+                showMessage('error', `שגיאה בהוספת מנהל: ${error.message}.`, 'manage-admins-message');
+            }
+        }
+
+        // --- Admin Page Loaders ---
+
+        async function loadDashboard() {
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
+                <h2 class="admin-page-title"><i class="fas fa-tachometer-alt"></i> לוח בקרה</h2>
+                <div id="dashboard-message"></div>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-newspaper"></i></div>
+                        <div class="value" id="total-articles-stat">0</div>
+                        <div class="label">כתבות סה"כ</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-users"></i></div>
+                        <div class="value" id="total-users-stat">0</div>
+                        <div class="label">משתמשים רשומים</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon"><i class="fas fa-pen-nib"></i></div>
+                        <div class="value" id="admin-articles-stat">0</div>
+                        <div class="label">כתבות מערכת NewsE</div>
+                    </div>
+                </div>
+            `);
+
+            try {
+                const [articlesSnapshot, usersSnapshot] = await Promise.all([
+                    firestore.collection('articles').get(),
+                    firestore.collection('users').get()
+                ]);
+
+                document.getElementById('total-articles-stat').textContent = articlesSnapshot.size;
+                
+                // --- Change 1: Registered users will be 1 less than total users ---
+                const actualUsersCount = usersSnapshot.size > 0 ? usersSnapshot.size - 1 : 0; // Assuming 'system-admin' is one of the users
+                document.getElementById('total-users-stat').textContent = actualUsersCount;
+
+                const adminArticles = articlesSnapshot.docs.filter(doc => doc.data().authorName === "מערכת NewsE");
+                document.getElementById('admin-articles-stat').textContent = adminArticles.length;
+
+            } catch (error) {
+                console.error("Error fetching dashboard stats:", error);
+                showMessage('error', 'שגיאה בטעינת נתוני לוח הבקרה.', 'dashboard-message');
+            }
+        }
+
+        async function loadManageArticlesPage(searchTerm = '') {
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
+                <h2 class="admin-page-title"><i class="fas fa-newspaper"></i> ניהול כתבות</h2>
+                <div id="manage-articles-message"></div>
+                <div class="admin-search-bar">
+                    <input type="text" id="article-search-input" placeholder="חפש כתבה לפי כותרת, יוצר, מזהה..." value="${searchTerm}">
+                    <button id="article-search-btn"><i class="fas fa-search"></i> חיפוש</button>
+                </div>
+                <div id="articles-table-container">טוען כתבות... <i class="fas fa-spinner fa-spin"></i></div>
+            `);
+
+            document.getElementById('article-search-btn').addEventListener('click', () => {
+                const term = document.getElementById('article-search-input').value.trim();
+                window.location.hash = `#manage-articles?search=${encodeURIComponent(term)}`;
+            });
+            document.getElementById('article-search-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const term = document.getElementById('article-search-input').value.trim();
+                    window.location.hash = `#manage-articles?search=${encodeURIComponent(term)}`;
+                }
+            });
+
+            const articlesTableContainer = document.getElementById('articles-table-container');
+
+            try {
+                const articlesSnapshot = await firestore.collection('articles').orderBy('createdAt', 'desc').get();
+                const usersSnapshot = await firestore.collection('users').get();
+                const usersMap = {};
+                usersSnapshot.forEach(doc => {
+                    usersMap[doc.id] = doc.data().fullName || doc.data().email || 'משתמש לא ידוע';
+                });
+
+                let articles = [];
+                articlesSnapshot.forEach(doc => {
+                    articles.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (searchTerm) {
+                    const searchLower = searchTerm.toLowerCase();
+                    articles = articles.filter(article => {
+                        const titleLower = (article.title || '').toLowerCase();
+                        const authorName = (article.authorName || (usersMap[article.authorId] || 'משתמש לא ידוע')).toLowerCase();
+                        const articleIdLower = article.id.toLowerCase();
+
+                        return titleLower.includes(searchLower) ||
+                               authorName.includes(searchLower) ||
+                               articleIdLower.includes(searchLower);
+                    });
+                }
+
+                if (articles.length === 0) {
+                    articlesTableContainer.innerHTML = '<p style="text-align: center; color: #888;">אין כתבות למציאה.</p>';
+                    return;
+                }
+
+                let tableHtml = `
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>מזהה כתבה</th>
+                                <th>כותרת</th>
+                                <th>יוצר</th>
+                                <th>תאריך יצירה</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                articles.forEach(article => {
+                    const authorDisplayName = article.authorName || usersMap[article.authorId] || 'משתמש לא ידוע';
+                    const createdAt = article.createdAt ? new Date(article.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+                    tableHtml += `
+                        <tr>
+                            <td>${article.id}</td>
+                            <td>${article.title}</td>
+                            <td>${authorDisplayName}</td>
+                            <td>${createdAt}</td>
+                            <td class="action-buttons">
+                                <button class="view-btn" onclick="window.location.hash='#single-article?id=${article.id}'"><i class="fas fa-eye"></i> צפה</button>
+                                <button class="edit-btn" onclick="window.location.hash='#create-article?edit=${article.id}'"><i class="fas fa-edit"></i> ערוך</button>
+                                <button class="delete-btn" onclick="confirmArticleDelete('${article.id}', '${article.title}')"><i class="fas fa-trash-alt"></i> מחק</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tableHtml += `</tbody></table>`;
+                articlesTableContainer.innerHTML = tableHtml;
+
+            } catch (error) {
+                console.error('שגיאה בטעינת כתבות לניהול:', error);
+                articlesTableContainer.innerHTML = '<p class="error-message">שגיאה בטעינת כתבות.</p>';
+                showMessage('error', 'שגיאה בטעינת כתבות.', 'manage-articles-message');
+            }
+        }
+
+        async function loadCreateArticleAdminPage(articleIdToEdit = null) {
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            let pageTitle = 'צור כתבה חדשה (מערכת NewsE)';
+            let submitBtnText = 'פרסם כתבה';
+            let initialTitle = '';
+            let initialContent = '';
+
+            window.adminEditingArticleId = articleIdToEdit;
+
+            if (articleIdToEdit) {
+                pageTitle = 'ערוך כתבה';
+                submitBtnText = 'עדכן כתבה';
+                try {
+                    const docSnap = await firestore.collection('articles').doc(articleIdToEdit).get();
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        initialTitle = data.title;
+                        initialContent = data.content;
+                    } else {
+                        console.warn("Article for editing not found, switching to create mode.");
+                        articleIdToEdit = null;
+                        window.adminEditingArticleId = null;
+                        showMessage('error', 'הכתבה לעריכה לא נמצאה. עבר למצב יצירה חדשה.', 'admin-create-article-message');
+                    }
+                } catch (error) {
+                    console.error("שגיאה בטעינת הכתבה לעריכה:", error);
+                    showMessage('error', 'שגיאה בטעינת הכתבה לעריכה.', 'admin-create-article-message');
+                    articleIdToEdit = null;
+                    window.adminEditingArticleId = null;
+                }
+            }
+
+            renderAdminContent(`
+                <h2 class="admin-page-title"><i class="fas fa-pen-nib"></i> ${pageTitle}</h2>
+                <div id="admin-create-article-message"></div>
+                <form id="admin-create-article-form">
+                    <input type="text" id="admin-article-title" placeholder="כותרת הכתבה" value="${initialTitle}" required>
+                    <textarea id="admin-article-content" placeholder="תוכן הכתבה" rows="15" required>${initialContent}</textarea>
+                    <button type="submit"><i class="fas fa-paper-plane"></i> ${submitBtnText}</button>
+                </form>
+            `);
+            const form = document.getElementById('admin-create-article-form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (window.adminEditingArticleId) {
+                    handleAdminUpdateArticle(e);
+                } else {
+                    handleAdminCreateArticle(e);
+                }
+            });
+            addValidationListeners(form);
+        }
+
+        async function loadManageUsersPage(searchTerm = '') {
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
+                <h2 class="admin-page-title"><i class="fas fa-users-cog"></i> ניהול משתמשים</h2>
+                <div id="manage-users-message"></div>
+                <div class="admin-search-bar">
+                    <input type="text" id="user-search-input" placeholder="חפש משתמש לפי שם מלא, אימייל, ID..." value="${searchTerm}">
+                    <button id="user-search-btn"><i class="fas fa-search"></i> חיפוש</button>
+                </div>
+                <div id="users-table-container">טוען משתמשים... <i class="fas fa-spinner fa-spin"></i></div>
+            `);
+
+            document.getElementById('user-search-btn').addEventListener('click', () => {
+                const term = document.getElementById('user-search-input').value.trim();
+                window.location.hash = `#manage-users?search=${encodeURIComponent(term)}`;
+            });
+            document.getElementById('user-search-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const term = document.getElementById('user-search-input').value.trim();
+                    window.location.hash = `#manage-users?search=${encodeURIComponent(term)}`;
+                }
+            });
+
+            const usersTableContainer = document.getElementById('users-table-container');
+
+            try {
+                const usersSnapshot = await firestore.collection('users').get();
+                let users = [];
+                usersSnapshot.forEach(doc => {
+                    // --- Change 4: Hide 'system-admin' user ---
+                    if (doc.id !== 'system-admin') {
+                        users.push({ id: doc.id, ...doc.data() });
+                    }
+                });
+
+                if (searchTerm) {
+                    const searchLower = searchTerm.toLowerCase();
+                    users = users.filter(user => {
+                        const fullNameLower = (user.fullName || '').toLowerCase();
+                        const emailLower = (user.email || '').toLowerCase();
+                        const userIdLower = user.id.toLowerCase();
+
+                        return fullNameLower.includes(searchLower) ||
+                               emailLower.includes(searchLower) ||
+                               userIdLower.includes(searchLower);
+                    });
+                }
+
+                if (users.length === 0) {
+                    usersTableContainer.innerHTML = '<p style="text-align: center; color: #888;">אין משתמשים למציאה.</p>';
+                    return;
+                }
+
+                let tableHtml = `
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>מזהה משתמש</th>
+                                <th>שם מלא</th>
+                                <th>אימייל</th>
+                                <th>סטטוס</th>
+                                <th>תאריך הצטרפות</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                users.forEach(user => {
+                    const createdAt = user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+                    const status = user.isSuspended ? '<span class="user-status-suspended">מושעה</span>' : '<span class="user-status-active">פעיל</span>';
+                    tableHtml += `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.fullName || 'אין שם'}</td>
+                            <td>${user.email}</td>
+                            <td>${status}</td>
+                            <td>${createdAt}</td>
+                            <td class="action-buttons">
+                                <button class="view-btn" onclick="window.location.hash='#single-user?id=${user.id}'"><i class="fas fa-eye"></i> צפה</button>
+                                <button class="edit-btn" onclick="window.location.hash='#single-user?id=${user.id}'"><i class="fas fa-edit"></i> נהל</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tableHtml += `</tbody></table>`;
+                usersTableContainer.innerHTML = tableHtml;
+
+            } catch (error) {
+                console.error('שגיאה בטעינת משתמשים לניהול:', error);
+                usersTableContainer.innerHTML = '<p class="error-message">שגיאה בטעינת משתמשים.</p>';
+                showMessage('error', 'שגיאה בטעינת משתמשים.', 'manage-users-message');
+            }
+        }
+
+        async function loadSingleArticleAdminPage(articleId) {
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            renderAdminContent(`
+                <h2 class="admin-page-title"><i class="fas fa-file-alt"></i> ניהול כתבה</h2>
+                <div id="single-article-admin-message"></div>
+                <div id="admin-single-article">טוען פרטי כתבה... <i class="fas fa-spinner fa-spin"></i></div>
+                <div class="admin-action-group">
+                    <button onclick="window.location.hash='#manage-articles'"><i class="fas fa-arrow-right"></i> חזור לניהול כתבות</button>
+                </div>
+            `);
+            const articleContainer = document.getElementById('admin-single-article');
+            try {
+                const docSnap = await firestore.collection('articles').doc(articleId).get();
+                if (docSnap.exists) {
+                    const data = docSnap.data();
+                    const publishDate = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString('he-IL', { dateStyle: 'medium' }) : 'תאריך לא ידוע';
+                    const publishTime = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : 'שעה לא ידועה';
+
+                    let authorDisplayName = data.authorName || 'משתמש לא ידוע';
+                    let authorLinkHtml = `<span style="color: var(--light-text-color);">${authorDisplayName}</span>`;
+
+                    if (data.authorId) { // Check if authorId exists (for regular users)
+                        const userDoc = await firestore.collection('users').doc(data.authorId).get();
+                        if (userDoc.exists) {
+                            authorDisplayName = userDoc.data().fullName || userDoc.data().email || 'משתמש לא ידוע';
+                            // --- Change 4: Prevent linking to system-admin page ---
+                            if (data.authorId !== 'system-admin') {
+                                authorLinkHtml = `<a href="#single-user?id=${data.authorId}" style="color: var(--secondary-color); text-decoration: none;">${authorDisplayName}</a>`;
+                            } else {
+                                authorLinkHtml = `<span style="color: var(--light-text-color);">${authorDisplayName}</span>`;
+                            }
+                        }
+                    }
+
+                    articleContainer.innerHTML = `
+                        <h3>${data.title}</h3>
+                        <p><i class="fas fa-id-badge"></i> מזהה כתבה: ${articleId}</p>
+                        <p><i class="fas fa-calendar-alt"></i> תאריך יצירה: ${publishDate} בשעה ${publishTime}</p>
+                        <p><i class="fas fa-user"></i> יוצר: ${authorLinkHtml}</p>
+                        <div class="article-content">
+                            <p><strong>תוכן:</strong></p>
+                            ${data.content}
+                        </div>
+                        <div class="admin-action-group">
+                            <button class="edit-btn" onclick="window.location.hash = '#create-article?edit=${articleId}'"><i class="fas fa-edit"></i> ערוך כתבה</button>
+                            <button class="delete-btn" onclick="confirmArticleDelete('${articleId}', '${data.title}')"><i class="fas fa-trash-alt"></i> מחק כתבה</button>
+                        </div>
+                    `;
+
+                } else {
+                    articleContainer.innerHTML = '<p class="error-message">הכתבה לא נמצאה.</p>';
+                    showMessage('error', 'הכתבה לא נמצאה.', 'single-article-admin-message');
+                }
+            } catch (error) {
+                console.error("Error loading single article for admin:", error);
+                articleContainer.innerHTML = '<p class="error-message">שגיאה בטעינת פרטי הכתבה.</p>';
+                showMessage('error', 'שגיאה בטעינת פרטי הכתבה.', 'single-article-admin-message');
+            }
+        }
+
+        async function loadSingleUserAdminPage(userId) {
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            // --- Change 4: Prevent loading 'system-admin' user page ---
+            if (userId === 'system-admin') {
+                showMessage('error', 'משתמש זה אינו ניתן לניהול ישיר.', 'single-user-admin-message');
+                window.location.hash = '#manage-users';
+                return;
+            }
+
+            renderAdminContent(`
+                <h2 class="admin-page-title"><i class="fas fa-user-circle"></i> ניהול משתמש</h2>
+                <div id="single-user-admin-message"></div>
+                <div id="admin-single-user">טוען פרטי משתמש... <i class="fas fa-spinner fa-spin"></i></div>
+                <div class="admin-action-group">
+                    <button onclick="window.location.hash='#manage-users'"><i class="fas fa-arrow-right"></i> חזור לניהול משתמשים</button>
+                </div>
+            `);
+            const userContainer = document.getElementById('admin-single-user');
+            try {
+                const userDocSnap = await firestore.collection('users').doc(userId).get();
+                if (userDocSnap.exists) {
+                    const userData = userDocSnap.data();
+                    const createdAt = userData.createdAt ? new Date(userData.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+                    const statusText = userData.isSuspended ? 'מושעה' : 'פעיל';
+                    const statusClass = userData.isSuspended ? 'user-status-suspended' : 'user-status-active';
+
+                    userContainer.innerHTML = `
+                        <h3>${userData.fullName || 'אין שם'}</h3>
+                        <p><i class="fas fa-id-badge"></i> מזהה משתמש: ${userId}</p>
+                        <p><i class="fas fa-envelope"></i> אימייל: ${userData.email}</p>
+                        <p><i class="fas fa-calendar-alt"></i> תאריך הצטרפות: ${createdAt}</p>
+                        <p><i class="fas fa-user-tag"></i> סטטוס: <span class="${statusClass}">${statusText}</span></p>
+
+                        <form id="edit-user-form" style="margin-top: 20px;">
+                            <h4><i class="fas fa-edit"></i> ערוך פרטי משתמש</h4>
+                            <input type="text" id="edit-user-full-name" placeholder="שם מלא" value="${userData.fullName || ''}" required>
+                            <input type="text" id="edit-user-email" placeholder="אימייל" value="${userData.email}" required>
+                            <button type="submit"><i class="fas fa-save"></i> שמור שינויים</button>
+                        </form>
+
+                        <h4 style="margin-top: 30px;"><i class="fas fa-lock"></i> פעולות אבטחה</h4>
+                        <div class="admin-action-group">
+                            <button class="action-btn" onclick="confirmResetUserPassword('${userId}', '${userData.email}')" style="background-color: var(--warning-color); color: white;"><i class="fas fa-key"></i> אפס סיסמת משתמש (דרך אימייל)</button>
+                            <button class="${userData.isSuspended ? 'action-btn' : 'action-btn'}"
+                                    onclick="${userData.isSuspended ? `confirmActivateUser('${userId}', '${userData.fullName || userData.email}')` : `confirmSuspendUser('${userId}', '${userData.fullName || userData.email}')`}"
+                                    style="background-color: ${userData.isSuspended ? 'var(--success-color)' : 'var(--error-color)'}; color: white;">
+                                <i class="fas ${userData.isSuspended ? 'fa-check-circle' : 'fa-minus-circle'}"></i> ${userData.isSuspended ? 'הפעל חשבון' : 'השהה חשבון'}
+                            </button>
+                            <button class="delete-btn" onclick="confirmDeleteUser('${userId}', '${userData.fullName || userData.email}')"><i class="fas fa-user-times"></i> מחק חשבון</button>
+                        </div>
+
+                        <h4 style="margin-top: 30px;"><i class="fas fa-newspaper"></i> כתבות המשתמש</h4>
+                        <div id="user-articles-list">טוען כתבות... <i class="fas fa-spinner fa-spin"></i></div>
+                    `;
+
+                    const editUserForm = document.getElementById('edit-user-form');
+                    editUserForm.addEventListener('submit', (e) => handleUpdateUser(e, userId));
+                    addValidationListeners(editUserForm);
+
+                    // Load user's articles
+                    const userArticlesList = document.getElementById('user-articles-list');
+                    const articlesSnapshot = await firestore.collection('articles').where('authorId', '==', userId).orderBy('createdAt', 'desc').get();
+                    if (articlesSnapshot.empty) {
+                        userArticlesList.innerHTML = '<p style="text-align: center; color: #888;">למשתמש זה אין כתבות שפורסמו.</p>';
+                    } else {
+                        let articlesHtml = '<table class="admin-table"><thead><tr><th>כותרת</th><th>תאריך יצירה</th><th>פעולות</th></tr></thead><tbody>';
+                        articlesSnapshot.forEach(articleDoc => {
+                            const articleData = articleDoc.data();
+                            const createdAt = articleData.createdAt ? new Date(articleData.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+                            articlesHtml += `
+                                <tr>
+                                    <td>${articleData.title}</td>
+                                    <td>${createdAt}</td>
+                                    <td class="action-buttons">
+                                        <button class="view-btn" onclick="window.location.hash='#single-article?id=${articleDoc.id}'"><i class="fas fa-eye"></i> צפה</button>
+                                        <button class="edit-btn" onclick="window.location.hash='#create-article?edit=${articleDoc.id}'"><i class="fas fa-edit"></i> ערוך</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        articlesHtml += '</tbody></table>';
+                        userArticlesList.innerHTML = articlesHtml;
+                    }
+
+                } else {
+                    userContainer.innerHTML = '<p class="error-message">המשתמש לא נמצא.</p>';
+                    showMessage('error', 'המשתמש לא נמצא.', 'single-user-admin-message');
+                }
+            } catch (error) {
+                console.error("Error loading single user for admin:", error);
+                userContainer.innerHTML = '<p class="error-message">שגיאה בטעינת פרטי המשתמש.</p>';
+                showMessage('error', 'שגיאה בטעינת פרטי המשתמש.', 'single-user-admin-message');
+            }
+        }
+
+        async function loadManageAdminsPage() {
+            if (!sessionStorage.getItem('isAdminLoggedIn')) return checkAdminAccess();
+            
+            // --- Change 2: Restrict access to 'ניהול מנהלים' ---
+            const loggedInUsername = base64Decode(sessionStorage.getItem('isAdminLoggedIn'));
+            if (!['NewsE', 'AmitMatyas', 'Admin'].includes(loggedInUsername)) {
+                renderAdminContent(`
+                    <h2 class="admin-page-title"><i class="fas fa-user-shield"></i> גישה נדחתה</h2>
+                    <div class="message error" style="display:block; text-align:center;">
+                        אין לך הרשאות לגשת לדף ניהול מנהלים.
+                    </div>
+                    <div class="admin-action-group" style="justify-content: center;">
+                        <button onclick="window.location.hash='#dashboard'"><i class="fas fa-arrow-right"></i> חזור ללוח הבקרה</button>
+                    </div>
+                `);
+                return;
+            }
+
+            renderAdminContent(`
+                <h2 class="admin-page-title"><i class="fas fa-user-shield"></i> ניהול מנהלים</h2>
+                <div id="manage-admins-message"></div>
+                <form id="add-admin-manual-form">
+                    <h3><i class="fas fa-user-plus"></i> הוסף מנהל חדש</h3>
+                    <p style="font-size: 0.9em; color: var(--light-text-color); margin-bottom: 10px;">
+                        הוסף שם משתמש וסיסמה חדשים למנהל. שם המשתמש יופיע בכתובת ה-URL.
+                    </p>
+                    <input type="text" id="new-admin-name" placeholder="שם משתמש למנהל (לדוגמה: NewsEAdmin)" required>
+                    <input type="password" id="new-admin-password-manual" placeholder="סיסמה למנהל" required>
+                    <input type="password" id="new-admin-password-confirm-manual" placeholder="אשר סיסמה" required>
+                    <button type="submit"><i class="fas fa-user-plus"></i> הוסף מנהל</button>
+                </form>
+
+                <h3><i class="fas fa-list"></i> רשימת מנהלים קיימים</h3>
+                <div id="admins-list-container">טוען מנהלים... <i class="fas fa-spinner fa-spin"></i></div>
+            `);
+
+            const addAdminManualForm = document.getElementById('add-admin-manual-form');
+            addAdminManualForm.addEventListener('submit', handleAddAdminManual);
+            addValidationListeners(addAdminManualForm);
+
+            const adminsListContainer = document.getElementById('admins-list-container');
+            try {
+                const adminsSnapshot = await firestore.collection('admins').get();
+                const admins = [];
+                adminsSnapshot.forEach(doc => {
+                    admins.push({ username: doc.id, ...doc.data() });
+                });
+
+                if (admins.length === 0) {
+                    adminsListContainer.innerHTML = '<p style="text-align: center; color: #888;">אין מנהלים רשומים.</p>';
+                    return;
+                }
+
+                let tableHtml = `
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>שם משתמש מנהל</th>
+                                <th>תאריך יצירה</th>
+                                <th>פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                admins.forEach(admin => {
+                    const createdAt = admin.createdAt ? new Date(admin.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+                    tableHtml += `
+                        <tr>
+                            <td>${admin.username}</td>
+                            <td>${createdAt}</td>
+                            <td class="action-buttons">
+                                <button class="delete-btn" onclick="confirmAdminDelete('${admin.username}')"><i class="fas fa-trash-alt"></i> מחק</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tableHtml += `</tbody></table>`;
+                adminsListContainer.innerHTML = tableHtml;
+
+            } catch (error) {
+                console.error("Error fetching admins:", error);
+                adminsListContainer.innerHTML = '<p class="error-message">שגיאה בטעינת רשימת המנהלים.</p>';
+                showMessage('error', 'שגיאה בטעינת רשימת המנהלים.', 'manage-admins-message');
+            }
+        }
+
+
+        // --- Admin Actions (Articles) ---
+
+        async function handleAdminCreateArticle(event) {
+            event.preventDefault();
+            const form = event.target;
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const title = document.getElementById('admin-article-title').value;
+            const content = document.getElementById('admin-article-content').value;
+
+            try {
+                const newArticleRef = await firestore.collection('articles').add({
+                    title: title,
+                    content: content,
+                    authorName: ADMIN_DISPLAY_NAME_FIXED, // Fixed author name
+                    authorId: "system-admin", // Unique ID for system-created articles
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showMessage('success', `הכתבה פורסמה בהצלחה על ידי ${ADMIN_DISPLAY_NAME_FIXED}!`, 'admin-create-article-message');
+                form.reset();
+                window.location.hash = `#single-article?id=${newArticleRef.id}`;
+            } catch (error) {
+                console.error('שגיאה ביצירת הכתבה:', error);
+                showMessage('error', `שגיאה ביצירת הכתבה: ${error.message}.`, 'admin-create-article-message');
+            }
+        }
+
+        async function handleAdminUpdateArticle(event) {
+            event.preventDefault();
+            const form = event.target;
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const articleId = window.adminEditingArticleId;
+            if (!articleId) {
+                showMessage('error', 'אין כתבה לעדכון. אנא בחר כתבה לעריכה.', 'admin-create-article-message');
+                return;
+            }
+
+            const title = document.getElementById('admin-article-title').value;
+            const content = document.getElementById('admin-article-content').value;
+
+            try {
+                await firestore.collection('articles').doc(articleId).update({
+                    title: title,
+                    content: content
+                });
+
+                showMessage('success', 'הכתבה עודכנה בהצלחה!', 'admin-create-article-message');
+                window.location.hash = `#single-article?id=${articleId}`;
+                window.adminEditingArticleId = null;
+            } catch (error) {
+                console.error('שגיאה בעדכון הכתבה:', error);
+                showMessage('error', `שגיאה בעדכון הכתבה: ${error.message}.`, 'admin-create-article-message');
+            }
+        }
+
+        function confirmArticleDelete(articleId, articleTitle) {
+            showAdminConfirmationModal(
+                `האם אתה בטוח שברצונך למחוק את הכתבה "${articleTitle}"? פעולה זו בלתי הפיכה.`,
+                () => deleteArticle(articleId)
+            );
+        }
+
+        async function deleteArticle(articleId) {
+            try {
+                await firestore.collection('articles').doc(articleId).delete();
+                showMessage('success', 'הכתבה נמחקה בהצלחה!', 'manage-articles-message');
+                window.location.hash = '#manage-articles';
+            } catch (error) {
+                console.error('שגיאה במחיקת הכתבה:', error);
+                showMessage('error', `שגיאה במחיקת הכתבה: ${error.message}.`, 'manage-articles-message');
+            }
+        }
+
+        // --- Admin Actions (Users) ---
+
+        async function handleUpdateUser(event, userId) {
+            event.preventDefault();
+            const form = event.target;
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const fullName = document.getElementById('edit-user-full-name').value;
+            const email = document.getElementById('edit-user-email').value;
+
+            try {
+                await firestore.collection('users').doc(userId).update({
+                    fullName: fullName,
+                    // DO NOT update email in Firestore if you also manage it in Firebase Auth directly here
+                    // If you update email via Firebase Auth, ensure you also update it in Firestore via a Cloud Function or similar.
+                    email: email // This only updates the Firestore profile, not Firebase Auth email directly from client.
+                });
+                showMessage('success', 'פרטי המשתמש עודכנו בהצלחה!', 'single-user-admin-message');
+                loadSingleUserAdminPage(userId); // Reload page to reflect changes
+            } catch (error) {
+                console.error('שגיאה בעדכון פרטי משתמש:', error);
+                showMessage('error', `שגיאה בעדכון פרטי משתמש: ${error.message}.`, 'single-user-admin-message');
+            }
+        }
+
+        function confirmResetUserPassword(userId, userEmail) {
+            // Note: Firebase client SDK does not allow direct password reset for other users.
+            // This would typically involve Firebase Authentication sendPasswordResetEmail
+            // which requires the email to be linked to an authenticated user.
+            // For a production app, this would be a Firebase Cloud Function.
+            showAdminConfirmationModal(
+                `אזהרה: פעולת איפוס סיסמה עבור "${userEmail}" אינה נתמכת ישירות מהצד לקוח עבור משתמשים אחרים. נדרש פתרון שרת (כמו Firebase Cloud Functions) לשלוח אימייל איפוס סיסמה למשתמש.`,
+                () => { /* Do nothing, as direct reset is not possible */ },
+                () => { /* Do nothing on cancel */ },
+                'הבנתי',
+                'בטל'
+            );
+        }
+
+        function confirmSuspendUser(userId, userName) {
+            showAdminConfirmationModal(
+                `האם אתה בטוח שברצונך להשהות את חשבון המשתמש "${userName}"? סטטוס המשתמש ישתנה למושעה.`,
+                () => toggleUserStatus(userId, true)
+            );
+        }
+
+        function confirmActivateUser(userId, userName) {
+            showAdminConfirmationModal(
+                `האם אתה בטוח שברצונך להפעיל מחדש את חשבון המשתמש "${userName}"? סטטוס המשתמש ישתנה לפעיל.`,
+                () => toggleUserStatus(userId, false)
+            );
+        }
+
+        async function toggleUserStatus(userId, suspend) {
+            try {
+                // Update Firestore status first (for display in admin panel)
+                await firestore.collection('users').doc(userId).update({
+                    isSuspended: suspend
+                });
+
+                // --- Change 5: Update Firebase Authentication user status ---
+                // This requires Firebase Admin SDK on a secure backend (e.g., Cloud Function).
+                // Example of how you would call a Cloud Function (pseudo-code):
+                // await firebase.functions().httpsCallable('toggleUserAccountStatus')({ userId, suspend });
+
+                // Since direct client-side update is not possible, we simulate the error message.
+                // In a real application, the Cloud Function would handle Firebase Auth directly,
+                // and you would just reload the user data after a successful Cloud Function call.
+                
+                // For demonstration, simulating Firebase Auth error if trying to suspend/activate directly from client
+                // If you were to run this without a Cloud Function, the Firebase Auth part would fail.
+                
+                // Instead of actually trying to disable Auth from client:
+                // We'll show success based on Firestore update, and explain the Auth part.
+                showMessage('success', `החשבון ${suspend ? 'הושעה' : 'הופעל'} בהצלחה ב-Firestore. (פעולת השעיה/הפעלה ב-Firebase Authentication דורשת פונקציית שרת).`, 'single-user-admin-message');
+                loadSingleUserAdminPage(userId); // Reload page to reflect changes
+            } catch (error) {
+                console.error('שגיאה בשינוי סטטוס משתמש:', error);
+                // --- Change 5: Custom error message for user suspension ---
+                let errorMessage = `שגיאה בשינוי סטטוס משתמש: ${error.message}.`;
+                if (error.code === 'auth/user-disabled') {
+                    errorMessage = 'חשבונך הושעה.';
+                }
+                showMessage('error', errorMessage, 'single-user-admin-message');
+            }
+        }
+
+        function confirmDeleteUser(userId, userName) {
+            showAdminConfirmationModal(
+                `האם אתה בטוח שברצונך למחוק את חשבון המשתמש "${userName}" וכל הכתבות שלו? פעולה זו בלתי הפיכה.`,
+                async () => {
+                    try {
+                        const articlesToDeleteSnapshot = await firestore.collection('articles').where('authorId', '==', userId).get();
+                        const deleteArticlePromises = [];
+                        articlesToDeleteSnapshot.forEach(doc => {
+                            deleteArticlePromises.push(firestore.collection('articles').doc(doc.id).delete());
+                        });
+                        await Promise.all(deleteArticlePromises);
+
+                        await firestore.collection('users').doc(userId).delete();
+
+                        // IMPORTANT: To delete the user from Firebase Authentication, you NEED the Admin SDK on a secure server (e.g., Cloud Function).
+                        // This client-side code CANNOT delete a Firebase Auth user directly.
+                        showMessage('warning', 'חשבון המשתמש וכתבותיו נמחקו מה-Firestore. אם משתמש זה קיים גם ב-Firebase Authentication, יש למחוק אותו משם באופן ידני או דרך פונקציית שרת מאובטחת.', 'single-user-admin-message');
+                        window.location.hash = '#manage-users';
+                    } catch (error) {
+                        console.error('שגיאה במחיקת משתמש:', error);
+                        showMessage('error', `שגיאה במחיקת משתמש: ${error.message}.`, 'single-user-admin-message');
+                    }
+                }
+            );
+        }
+
+        async function handleAddAdminManual(event) {
+            event.preventDefault();
+            const form = event.target;
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const username = document.getElementById('new-admin-name').value.trim();
+            const password = document.getElementById('new-admin-password-manual').value;
+            const confirmPassword = document.getElementById('new-admin-password-confirm-manual').value;
+            const messageDiv = document.getElementById('manage-admins-message');
+
+            if (password.length < 6) {
+                showMessage('error', 'הסיסמה חייבת להיות באורך 6 תווים לפחות.', 'manage-admins-message');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showMessage('error', 'הסיסמאות אינן תואמות.', 'manage-admins-message');
+                return;
+            }
+
+            try {
+                const adminDocRef = firestore.collection('admins').doc(username);
+                const adminDoc = await adminDocRef.get();
+
+                if (adminDoc.exists) {
+                    showMessage('error', `שם המנהל "${username}" כבר קיים. אנא בחר שם אחר.`, 'manage-admins-message');
+                    return;
+                }
+
+                await adminDocRef.set({
+                    passwordHash: base64Encode(password), // INSECURE FOR PRODUCTION! Use proper hashing on backend.
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showMessage('success', `מנהל "${username}" נוסף בהצלחה!`, 'manage-admins-message');
+                form.reset();
+                addValidationListeners(form); // Re-add listeners after reset
+                loadManageAdminsPage(); // Reload the list of admins
+            } catch (error) {
+                console.error('שגיאה בהוספת מנהל:', error);
+                showMessage('error', `שגיאה בהוספת מנהל: ${error.message}.`, 'manage-admins-message');
+            }
+        }
+
+        function confirmAdminDelete(adminUsername) {
+            if (adminUsername === base64Decode(currentAdminUserHash)) { // Check against decoded username
+                showMessage('error', 'לא ניתן למחוק את המנהל המחובר כרגע.', 'manage-admins-message');
+                return;
+            }
+            showAdminConfirmationModal(
+                `האם אתה בטוח שברצונך למחוק את המנהל "${adminUsername}"? פעולה זו בלתי הפיכה.`,
+                () => deleteAdmin(adminUsername)
+            );
+        }
+
+        async function deleteAdmin(adminUsername) {
+            try {
+                await firestore.collection('admins').doc(adminUsername).delete();
+                showMessage('success', `מנהל "${adminUsername}" נמחק בהצלחה!`, 'manage-admins-message');
+                loadManageAdminsPage(); // Reload the list of admins
+            } catch (error) {
+                console.error('שגיאה במחיקת מנהל:', error);
+                showMessage('error', `שגיאה במחיקת מנהל: ${error.message}.`, 'manage-admins-message');
+            }
+        }
+
+        // --- General Form Validation ---
+        function addValidationListeners(form) {
+            form.querySelectorAll('input[required], textarea[required]').forEach(input => {
+                input.addEventListener('blur', () => {
+                    if (input.value.trim() === '') {
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+                input.addEventListener('input', () => {
+                    if (input.value.trim() !== '' && input.checkValidity()) {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+            });
+
+            form.addEventListener('submit', () => {
+                form.querySelectorAll('input[required], textarea[required]').forEach(input => {
+                    if (!input.checkValidity()) {
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+            });
+        }
+
+
+        // --- Routing and Initialization ---
+        function handleAdminHashChange() {
+            // Check if user is actually logged in before routing to internal pages
+            if (!sessionStorage.getItem('isAdminLoggedIn')) {
+                checkAdminAccess(); // This will show login or access denied
+                return;
+            }
+
+            const hash = window.location.hash.split('?')[0]; // Get hash without query params
+            const urlParams = new URLSearchParams(window.location.hash.split('?')[1]); // Get query params
+
+            switch (hash) {
+                case '#dashboard':
+                    loadDashboard();
+                    break;
+                case '#manage-articles':
+                    const articleSearchTerm = urlParams.get('search') || '';
+                    loadManageArticlesPage(decodeURIComponent(articleSearchTerm));
+                    break;
+                case '#create-article':
+                    const editArticleId = urlParams.get('edit');
+                    loadCreateArticleAdminPage(editArticleId);
+                    break;
+                case '#manage-users':
+                    const userSearchTerm = urlParams.get('search') || '';
+                    loadManageUsersPage(decodeURIComponent(userSearchTerm));
+                    break;
+                case '#single-article':
+                    const articleId = urlParams.get('id');
+                    if (articleId) loadSingleArticleAdminPage(articleId);
+                    else window.location.hash = '#manage-articles'; // Redirect if ID is missing
+                    break;
+                case '#single-user':
+                    const userId = urlParams.get('id');
+                    if (userId) loadSingleUserAdminPage(userId);
+                    else window.location.hash = '#manage-users'; // Redirect if ID is missing
+                    break;
+                case '#manage-admins':
+                    loadManageAdminsPage();
+                    break;
+                case '#admin': // This should only happen if someone types #admin without a user
+                    // Fall through to default if it's just #admin. checkAdminAccess handles the base /admin.html
+                    // If it was #admin/user and then they remove /user, it will trigger an invalid hash and fall to denied.
+                    checkAdminAccess();
+                    break;
+                default:
+                    // If hash is empty or unrecognized, redirect to dashboard if logged in
+                    // or let checkAdminAccess handle invalid hashes (like #admin without user)
+                    if (sessionStorage.getItem('isAdminLoggedIn')) {
+                        window.location.hash = '#dashboard';
+                    } else {
+                        checkAdminAccess();
+                    }
+                    break;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add event listener for the main login form
+            document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
+            // The "Add New Admin" form is likely part of 'manage-admins' page, so this listener here is a duplicate.
+            // It should be attached within `loadManageAdminsPage` after the form is rendered.
+            // document.getElementById('add-new-admin-form').addEventListener('submit', handleAddNewAdmin);
+            
+            // Initial check for admin access based on URL hash
+            checkAdminAccess();
+
+            // Attach event listeners for sidebar and logout
+            adminLogoutBtn.addEventListener('click', adminLogout);
+            document.querySelectorAll('#admin-sidebar .sidebar-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.hash = item.getAttribute('href');
+                });
+            });
+
+            // Handle hash change events
+            window.addEventListener('hashchange', handleAdminHashChange);
+
+            // Hide loading screen after initial checks
+            loadingScreen.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
