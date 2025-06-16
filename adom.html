@@ -81,40 +81,53 @@
         transform: translateY(0);
       }
 
-      /* --- כותרת ולוגו ראשיים --- */
-      .alert-header {
-        display: flex;
-        flex-direction: column; /* הלוגו מעל הכותרת */
-        align-items: center;
-        margin-bottom: 40px;
-        animation: fadeInDown 1s ease-out forwards;
-      }
+/* --- כותרת ולוגו ראשיים --- */
+.alert-header {
+  display: flex;
+  flex-direction: column; /* הלוגו מעל הכותרת */
+  align-items: center;
+  margin-bottom: 40px;
+  /* אנימציית fadeInDown כבר קיימת וטובה, נשאיר אותה */
+  animation: fadeInDown 1s ease-out forwards;
+}
 
-      .main-logo { /* קלאס חדש ללוגו הגדול למעלה */
-        width: 120px; /* גודל גדול יותר */
-        height: 120px;
-        margin-bottom: 15px; /* מרווח בין הלוגו לכותרת */
-        animation: rotateIn 1s ease-out forwards; /* אנימציית סיבוב */
-      }
+.main-logo { /* קלאס חדש ללוגו הגדול למעלה */
+  width: 180px; /* הגדלה משמעותית של הלוגו */
+  height: 180px;
+  margin-bottom: 15px; /* מרווח בין הלוגו לכותרת */
+  animation: rotateIn 1s ease-out forwards; /* אנימציית סיבוב נשארת */
+}
 
-      @keyframes rotateIn {
-        from { transform: rotateY(90deg) scale(0.5); opacity: 0; }
-        to { transform: rotateY(0deg) scale(1); opacity: 1; }
-      }
+@keyframes rotateIn {
+  from { transform: rotateY(90deg) scale(0.5); opacity: 0; }
+  to { transform: rotateY(0deg) scale(1); opacity: 1; }
+}
 
-      .header-title {
-        font-size: 3.8em;
-        font-weight: 700;
-        color: #e74c3c;
-        /* הסרת הצל המכוער - רק זוהר עדין */
-        letter-spacing: 3px;
-        animation: neonGlow 1.5s infinite alternate; /* אנימציית ניאון */
-      }
+.header-title {
+  font-size: 3.8em;
+  font-weight: 700;
+  color: #e74c3c; /* צבע אדום נשאר */
+  text-shadow: none; /* הסרת כל צל או זוהר */
+  letter-spacing: 3px;
+  animation: none; /* הסרת כל אנימציית ניאון/זוהר */
+}
 
-      @keyframes neonGlow {
-        from { text-shadow: 0 0 5px #e74c3c, 0 0 10px #e74c3c, 0 0 15px #e74c3c; } /* זוהר עדין */
-        to { text-shadow: 0 0 8px #e74c3c, 0 0 16px #e74c3c, 0 0 24px #e74c3c; } /* זוהר עדין יותר בהבהוב */
-      }
+/* --- התאמות רספונסיביות --- */
+/* ודא שהלוגו והכותרת נשארים פרופורציונליים במסכים קטנים */
+@media (max-width: 1200px) {
+  .main-logo { width: 150px; height: 150px; }
+  .header-title { font-size: 3em; }
+}
+
+@media (max-width: 768px) {
+  .main-logo { width: 120px; height: 120px; }
+  .header-title { font-size: 2em; }
+}
+
+@media (max-width: 480px) {
+  .main-logo { width: 90px; height: 90px; }
+  .header-title { font-size: 1.5em; }
+}
 
       /* --- רשימת התרעות --- */
       .alerts-list {
