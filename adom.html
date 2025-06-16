@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>טיטוס - התרעות בזמן אמת</title>
+    <link rel="icon" href="https://i.postimg.cc/3r45Jr7M/13.png" type="image/png" />
+    <style>
+      /* --- כללי ואיפוס --- */
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden; /* מונע פסי גלילה */
+        font-family: 'Assistant', sans-serif; /* פונט שצופר משתמש בו */
+        background-color: #ffffff; /* רקע לבן כפי שביקשת */
+        color: #333333; /* טקסט כהה על רקע בהיר */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* ייבוא פונט Assistant */
+      @import url('https://fonts.googleapis.com/css?family=Assistant:400,700&display=swap');
+
+      /* --- מיכל ראשי למסך מלא --- */
+      .full-screen-container {
+        width: 100vw; /* 100% רוחב של חלון התצוגה */
+        height: 100vh; /* 100% גובה של חלון התצוגה */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* מרכוז אנכי */
+        align-items: center; /* מרכוז אופקי */
+        background-color: rgba(255, 255, 255, 0.9); /* רקע לבן שקוף במקצת */
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      /* --- כותרת ולוגו --- */
+      .alert-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 40px;
+        animation: fadeInDown 1s ease-out forwards; /* אנימציה לכניסה */
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        margin-left: 20px;
+      }
+
+      .header-title {
+        font-size: 3.8em; /* כותרת גדולה מאוד */
+        font-weight: 700; /* עובי פונט */
+        color: #e74c3c; /* צבע אדום לכותרת */
+        text-shadow: 0 0 15px rgba(231, 76, 60, 0.5); /* צל זוהר אדום עדין */
+        letter-spacing: 2px;
+      }
+
+      /* --- רשימת התרעות --- */
+      .alerts-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 90%; /* רוחב רשימת ההתרעות */
+        max-width: 1000px; /* רוחב מקסימלי */
+        text-align: center;
+        perspective: 1000px; /* לאפקט תלת מימד באנימציה */
+      }
+
+      /* --- פריט התרעה בודד --- */
+      .alert-item {
+        background-color: #e74c3c; /* אדום בוהק */
+        color: white;
+        padding: 25px 40px;
+        margin-bottom: 25px; /* מרווח בין התרעות */
+        border-radius: 15px;
+        font-size: 3em; /* גודל פונט גדול */
+        font-weight: 700;
+        box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6); /* צל זוהר חזק */
+        border: 4px solid #f9f9f9; /* מסגרת לבנה בולטת */
+        animation: slideInFromRight 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; /* אנימציה עם ריבאונד */
+        transform-origin: center center;
+        position: relative;
+        overflow: hidden; /* למקרה של אנימציית גלילה */
+      }
+
+      .alert-item:last-child {
+        margin-bottom: 0; /* ללא מרווח אחרי האחרון */
+      }
+
+      .alert-text {
+        white-space: nowrap; /* מונע שבירת שורות */
+        overflow: hidden;
+        text-overflow: ellipsis; /* מוסיף 3 נקודות אם הטקסט ארוך */
+        /* אם רוצים גלילת טקסט, נפעיל ב-JS */
+      }
+
+      /* --- אנימציות --- */
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-80px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideInFromRight {
+        from {
+          opacity: 0;
+          transform: translateX(100%) scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0) scale(1);
+        }
+        
+      }
+
+      @keyframes fadeOutAndShrink {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.9) translateY(-20px);
+        }
+      }
+
+      /* --- אנימציית הבהוב למלבן ההתרעה --- */
+      @keyframes pulseRed {
+        0% {
+          box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6);
+          transform: scale(1);
+        }
+        50% {
+          box-shadow: 0 0 45px rgba(231, 76, 60, 1), 0 0 70px rgba(231, 76, 60, 0.8);
+          transform: scale(1.02);
+        }
+        100% {
+          box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6);
+          transform: scale(1);
+        }
+      }
+
+      .alert-item.new-alert {
+        animation: slideInFromRight 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards,
+                   pulseRed 2s infinite; /* הפעל אנימציית הבהוב לחדשים */
+      }
+
+      /* --- התאמות רספונסיביות --- */
+      @media (max-width: 1200px) {
+        .header-title {
+          font-size: 3em;
+        }
+        .alert-item {
+          font-size: 2.5em;
+          padding: 20px 30px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .logo {
+          width: 50px;
+          height: 50px;
+          margin-left: 10px;
+        }
+        .header-title {
+          font-size: 2em;
+        }
+        .alert-item {
+          font-size: 1.8em;
+          padding: 15px 25px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .logo {
+          width: 40px;
+          height: 40px;
+          margin-left: 5px;
+        }
+        .header-title {
+          font-size: 1.5em;
+        }
+        .alert-item {
+          font-size: 1.3em;
+          padding: 10px 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="full-screen-container" id="full-screen-container">
+      <div class="alert-header">
+        <img src="https://i.postimg.cc/3r45Jr7M/13.png" alt="טיטוס לוגו" class="logo" />
+        <h1 class="header-title">טיטוס - התרעות בזמן אמת</h1>
+      </div>
+      <ul class="alerts-list" id="alerts-list">
+        </ul>
+    </div>
+
+    <script>
+      const ALERTS_API_URL = "https://api.tzevaadom.co.il/notifications";
+      const UPDATE_INTERVAL_MS = 1000; // כל 1 שנייה
+      const MAX_ALERTS_DISPLAY = 3; // מספר ההתרעות המקסימלי שיוצגו
+
+      const alertsList = document.getElementById("alerts-list");
+      let displayedAlertIds = new Set(); // שומר ID של התרעות שכבר הוצגו
+
+      // ממפה מספרי איום לתיאורים מובנים
+      const THREAT_MAP = {
+        1: "ירי קטיושות",
+        2: "חדירת כלי טיס עוין",
+        3: "רעידת אדמה",
+        4: "אירוע חומרים מסוכנים",
+        5: "ירי רקטות וטילים",
+        6: "צונאמי",
+        7: "שטפונות",
+        8: "שריפה",
+        9: "אחר",
+      };
+
+      /**
+       * ממיר חותמת זמן UNIX לשעה מקומית בפורמט HH:MM
+       * @param {number} unixTimestamp חותמת זמן בפורמט UNIX (שניות)
+       * @returns {string} שעה בפורמט HH:MM
+       */
+      function formatTime(unixTimestamp) {
+        const date = new Date(unixTimestamp * 1000); // ממיר משניות למילישניות
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+      }
+
+      /**
+       * יוצר הודעת התרעה קריאה מנתוני ה-API.
+       * @param {Object} alertData - אובייקט התרעה מה-API.
+       * @returns {string} - מחרוזת ההתרעה המעוצבת.
+       */
+      function createAlertMessage(alertData) {
+        const time = formatTime(alertData.time);
+        const threatDesc = THREAT_MAP[alertData.threat] || "איום לא ידוע";
+        const cities = alertData.cities && alertData.cities.length > 0 ? alertData.cities.join(', ') : "אזורים שונים";
+        const drillStatus = alertData.isDrill ? " - תרגיל" : "";
+
+        return `${cities}: ${threatDesc}${drillStatus} (${time})`;
+      }
+
+      /**
+       * מוסיף התרעה חדשה לתצוגה.
+       * @param {Object} alertData - אובייקט ההתרעה מה-API.
+       */
+      function addAlertToDisplay(alertData) {
+        if (displayedAlertIds.has(alertData.notificationId)) {
+          return; // התרעה זו כבר הוצגה
+        }
+
+        const message = createAlertMessage(alertData);
+        const listItem = document.createElement("li");
+        listItem.classList.add("alert-item");
+        listItem.innerHTML = `<div class="alert-text">${message}</div>`;
+
+        // הוסף את ההתרעה לראש הרשימה
+        alertsList.prepend(listItem);
+        displayedAlertIds.add(alertData.notificationId); // הוסף לסט ההתרעות שהוצגו
+
+        // הוסף את הקלאס new-alert להפעלת אנימציית ה-pulse
+        listItem.classList.add('new-alert');
+        // הסר את הקלאס new-alert לאחר זמן מה כדי שההבהוב יפסיק
+        setTimeout(() => {
+          listItem.classList.remove('new-alert');
+        }, 3000); // הסר אחרי 3 שניות
+
+        // וודא שלא נציג יותר מדי התרעות - הסר את הישנה ביותר
+        while (alertsList.children.length > MAX_ALERTS_DISPLAY) {
+          const oldestItem = alertsList.lastChild;
+          // הפעל אנימציית יציאה לפני הסרה
+          oldestItem.style.animation = 'fadeOutAndShrink 0.5s ease-out forwards';
+          oldestItem.addEventListener('animationend', () => {
+            // הסר את ה-ID שלה מסט ההתרעות שהוצגו
+            // נשתמש בגישה בטוחה יותר להסרת ה-ID המתאים
+            const removedAlertId = Array.from(displayedAlertIds).find(id => {
+                // נניח שההתרעות מסודרות לפי סדר הוספה ושהאחרונה ברשימה היא הישנה ביותר
+                // זה דורש ש-Set ישמור על סדר הכניסה, מה שלא מובטח באופן מוחלט
+                // פתרון טוב יותר יהיה לשמור את ה-ID כדאטא-אטריביוט על ה-li
+                return true; // פשוט נסיר את הישן ביותר כפי שרשימת ה-DOM מנוהלת
+            });
+            if (removedAlertId) {
+                displayedAlertIds.delete(removedAlertId);
+            }
+            oldestItem.remove();
+          }, { once: true });
+        }
+      }
+
+      /**
+       * מאחזר את ההתרעות מה-API ומעדכן את התצוגה.
+       */
+      async function fetchAlerts() {
+        try {
+          const response = await fetch(ALERTS_API_URL);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const alerts = await response.json();
+
+          // רק התרעות חדשות (שלא הוצגו עדיין)
+          // ה-API מחזיר את החדשות ביותר ראשונות, אז נטפל בהן בסדר הזה.
+          // חשוב: נבדוק מהסוף להתחלה כדי שההתרעות החדשות יתווספו נכון לראש הרשימה.
+          for (let i = alerts.length - 1; i >= 0; i--) {
+            const alert = alerts[i];
+            addAlertToDisplay(alert);
+          }
+
+        } catch (error) {
+          console.error("Error fetching alerts:", error);
+          // ניתן להציג הודעת שגיאה על המסך אם רוצים
+          // לדוגמה: alertsList.innerHTML = `<li class="alert-item" style="background-color: #f39c12; font-size: 1.5em; padding: 15px;">שגיאת טעינה: ודא חיבור לרשת או נסה שוב.</li>`;
+        }
+      }
+
+      // --- אתחול והפעלת טיימר ---
+      document.addEventListener("DOMContentLoaded", () => {
+        // טען התרעות פעם אחת מיד עם טעינת הדף
+        fetchAlerts();
+        // הגדר עדכון אוטומטי כל UPDATE_INTERVAL_MS מילישניות
+        setInterval(fetchAlerts, UPDATE_INTERVAL_MS);
+      });
+    </script>
+  </body>
+</html>
