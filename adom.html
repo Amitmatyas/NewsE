@@ -38,13 +38,13 @@
         align-items: center;
         z-index: 1000; /* וודא שהוא מעל הכל */
         opacity: 1;
-        transition: opacity 1s ease-out; /* אנימציית התפוגגות */
+        /* transition: opacity 1s ease-out; -- אנימציית ההתפוגגות תטופל בקלאס hidden */
       }
 
       .splash-logo {
         width: 150px;
         height: 150px;
-        animation: pulseAndGrow 2s infinite ease-in-out, fadeOutUp 1s 2s forwards; /* פעימה וגדילה, ואז עולה ונעלם */
+        animation: pulseAndGrow 2s infinite ease-in-out; /* רק פעימה וגדילה */
       }
 
       @keyframes pulseAndGrow {
@@ -53,13 +53,10 @@
         100% { transform: scale(0.8); opacity: 0.5; }
       }
 
-      @keyframes fadeOutUp {
-        from { opacity: 1; transform: translateY(0); }
-        to { opacity: 0; transform: translateY(-100px); visibility: hidden; }
-      }
-
+      /* קלאס חדש להסתרת הספלאש עם אנימציה */
       .splash-screen.hidden {
         opacity: 0;
+        transition: opacity 0.5s ease-out; /* זמן מעבר קצר יותר */
         pointer-events: none; /* מונע אינטראקציה אחרי שהתפוגג */
       }
 
@@ -76,7 +73,7 @@
         box-sizing: border-box;
         opacity: 0; /* נסתר בהתחלה */
         transform: translateY(50px);
-        transition: opacity 1s ease-out 2.5s, transform 1s ease-out 2.5s; /* אנימציית כניסה אחרי הספלאש */
+        transition: opacity 1s ease-out, transform 1s ease-out; /* אנימציית כניסה */
       }
 
       .full-screen-container.visible {
@@ -84,32 +81,40 @@
         transform: translateY(0);
       }
 
-      /* --- כותרת ולוגו --- */
+      /* --- כותרת ולוגו ראשיים --- */
       .alert-header {
         display: flex;
+        flex-direction: column; /* הלוגו מעל הכותרת */
         align-items: center;
         margin-bottom: 40px;
         animation: fadeInDown 1s ease-out forwards;
       }
 
-      .logo {
-        width: 70px;
-        height: 70px;
-        margin-left: 20px;
+      .main-logo { /* קלאס חדש ללוגו הגדול למעלה */
+        width: 120px; /* גודל גדול יותר */
+        height: 120px;
+        margin-bottom: 15px; /* מרווח בין הלוגו לכותרת */
+        animation: rotateIn 1s ease-out forwards; /* אנימציית סיבוב */
+      }
+
+      @keyframes rotateIn {
+        from { transform: rotateY(90deg) scale(0.5); opacity: 0; }
+        to { transform: rotateY(0deg) scale(1); opacity: 1; }
       }
 
       .header-title {
         font-size: 3.8em;
         font-weight: 700;
         color: #e74c3c;
-        text-shadow: 0 0 20px rgba(231, 76, 60, 0.7), 0 0 40px rgba(231, 76, 60, 0.4); /* צל זוהר חזק יותר */
+        /* הסרת הצל המכוער - רק זוהר עדין */
+        text-shadow: 0 0 10px rgba(231, 76, 60, 0.5); 
         letter-spacing: 3px;
         animation: neonGlow 1.5s infinite alternate; /* אנימציית ניאון */
       }
 
       @keyframes neonGlow {
-        from { text-shadow: 0 0 10px #e74c3c, 0 0 20px #e74c3c, 0 0 30px #e74c3c; }
-        to { text-shadow: 0 0 15px #e74c3c, 0 0 30px #e74c3c, 0 0 45px #e74c3c; }
+        from { text-shadow: 0 0 5px #e74c3c, 0 0 10px #e74c3c, 0 0 15px #e74c3c; } /* זוהר עדין */
+        to { text-shadow: 0 0 8px #e74c3c, 0 0 16px #e74c3c, 0 0 24px #e74c3c; } /* זוהר עדין יותר בהבהוב */
       }
 
       /* --- רשימת התרעות --- */
@@ -216,7 +221,7 @@
         z-index: 999; /* מעל שאר התוכן אבל מתחת לספלאש */
         opacity: 0; /* נסתר בהתחלה */
         transform: translateY(-50px);
-        transition: opacity 1s ease-out 2.5s, transform 1s ease-out 2.5s; /* אנימציית כניסה אחרי הספלאש */
+        transition: opacity 1s ease-out, transform 1s ease-out; /* אנימציית כניסה (ללא דיליי) */
       }
 
       .history-button.visible {
@@ -315,13 +320,14 @@
 
       /* --- התאמות רספונסיביות --- */
       @media (max-width: 1200px) {
+        .main-logo { width: 100px; height: 100px; }
         .header-title { font-size: 3em; }
         .alert-item.active { font-size: 2.5em; padding: 20px 30px; }
         .no-alerts-message { font-size: 2em; padding: 20px 30px; }
       }
 
       @media (max-width: 768px) {
-        .logo { width: 50px; height: 50px; margin-left: 10px; }
+        .main-logo { width: 80px; height: 80px; }
         .header-title { font-size: 2em; }
         .alert-item.active { font-size: 1.8em; padding: 15px 25px; }
         .no-alerts-message { font-size: 1.5em; padding: 15px 25px; }
@@ -331,7 +337,7 @@
       }
 
       @media (max-width: 480px) {
-        .logo { width: 40px; height: 40px; margin-left: 5px; }
+        .main-logo { width: 60px; height: 60px; }
         .header-title { font-size: 1.5em; }
         .alert-item.active { font-size: 1.3em; padding: 10px 15px; }
         .no-alerts-message { font-size: 1.2em; padding: 10px 15px; }
@@ -350,7 +356,7 @@
       <button class="history-button" id="history-button">היסטוריית התרעות (שעה אחורה)</button>
 
       <div class="alert-header">
-        <img src="https://i.postimg.cc/3r45Jr7M/13.png" alt="טיטוס לוגו" class="logo" />
+        <img src="https://i.postimg.cc/3r45Jr7M/13.png" alt="טיטוס לוגו" class="main-logo" />
         <h1 class="header-title">טיטוס - התרעות בזמן אמת</h1>
       </div>
       <ul class="alerts-list" id="alerts-list">
@@ -372,6 +378,7 @@
       const UPDATE_INTERVAL_MS = 1000; // כל 1 שנייה
       const MAX_ALERTS_DISPLAY = 3; // מספר ההתרעות המקסימלי שיוצגו
       const HISTORY_LOOKBACK_HOURS = 1; // שעות אחורה להיסטוריה
+      const SPLASH_SCREEN_DURATION_MS = 2500; // משך זמן מסך הפתיחה
 
       const splashScreen = document.getElementById("splash-screen");
       const fullScreenContainer = document.getElementById("full-screen-container");
@@ -606,22 +613,28 @@
 
       // --- אתחול והפעלת טיימר ---
       document.addEventListener("DOMContentLoaded", () => {
-        // הסתר את מסך הפתיחה לאחר כמה שניות וחשוף את התוכן הראשי
-        setTimeout(() => {
-          splashScreen.classList.add("hidden");
-          fullScreenContainer.classList.add("visible");
-          historyButton.classList.add("visible");
-          // התחל לטעון התרעות רק לאחר שהמסך הראשי גלוי
-          fetchAlerts();
-          setInterval(fetchAlerts, UPDATE_INTERVAL_MS);
-        }, 3000); // 3 שניות של ספלאש
+        // טען התרעות פעם אחת מיד עם טעינת הדף, לפני הצגת האלמנטים
+        // זה מבטיח שהנתונים זמינים ברגע שהמסך הראשי מופיע
+        fetchAlerts();
 
-        // וודא שהודעת "אין התרעות" מוצגת בהתחלה אם אין התרעות מיד
+        // הסתר את מסך הפתיחה וחשוף את התוכן הראשי לאחר זמן קבוע
         setTimeout(() => {
-            if (displayedAlerts.size === 0 && !document.querySelector('.no-alerts-message')) {
-                checkAndDisplayNoAlertsMessage();
-            }
-        }, 3500); // קצת אחרי הטעינה הראשונה
+          splashScreen.classList.add("hidden"); // התחל להסתיר את הספלאש
+          fullScreenContainer.classList.add("visible"); // התחל להציג את התוכן הראשי
+          historyButton.classList.add("visible"); // התחל להציג את כפתור ההיסטוריה
+
+          // הגדר עדכון אוטומטי רק לאחר שהמסך הראשי גלוי וה-fetch הראשוני בוצע
+          setInterval(fetchAlerts, UPDATE_INTERVAL_MS);
+
+          // וודא שהודעת "אין התרעות" מוצגת בהתחלה אם אין התרעות,
+          // לאחר שה-fetch הראשוני הסתיים והאלמנטים הראשיים נטענו
+          // דיליי קצרצר כדי לאפשר לפונקציית fetchAlerts לרוץ פעם אחת
+          setTimeout(() => {
+              if (displayedAlerts.size === 0 && !document.querySelector('.no-alerts-message')) {
+                  checkAndDisplayNoAlertsMessage();
+              }
+          }, 500); // 0.5 שניות אחרי סיום הספלאש
+        }, SPLASH_SCREEN_DURATION_MS);
       });
     </script>
   </body>
