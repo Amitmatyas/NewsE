@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>טיטוס - התרעות בזמן אמת</title>
     <link rel="icon" href="https://i.postimg.cc/3r45Jr7M/13.png" type="image/png" />
+
+    <link href="https://fonts.googleapis.com/css?family=Assistant:400,700&display=swap" rel="stylesheet">
+
     <style>
       /* --- כללי ואיפוס --- */
       body,
@@ -20,9 +23,6 @@
         justify-content: center;
         align-items: center;
       }
-
-      /* ייבוא פונט Assistant */
-      @import url('https://fonts.googleapis.com/css?family=Assistant:400,700&display=swap');
 
       /* --- מיכל ראשי למסך מלא --- */
       .full-screen-container {
@@ -95,7 +95,6 @@
         white-space: nowrap; /* מונע שבירת שורות */
         overflow: hidden;
         text-overflow: ellipsis; /* מוסיף 3 נקודות אם הטקסט ארוך */
-        /* אם רוצים גלילת טקסט, נפעיל ב-JS */
       }
 
       /* --- אנימציות --- */
@@ -119,7 +118,6 @@
           opacity: 1;
           transform: translateX(0) scale(1);
         }
-        
       }
 
       @keyframes fadeOutAndShrink {
@@ -212,7 +210,7 @@
       const MAX_ALERTS_DISPLAY = 3; // מספר ההתרעות המקסימלי שיוצגו
 
       const alertsList = document.getElementById("alerts-list");
-      let displayedAlertIds = new Set(); // שומר ID של התרעות שכבר הוצגו
+      let displayedAlerts = new Map(); // מפה של notificationId ל-DOM element
 
       // ממפה מספרי איום לתיאורים מובנים
       const THREAT_MAP = {
@@ -258,18 +256,22 @@
        * @param {Object} alertData - אובייקט ההתרעה מה-API.
        */
       function addAlertToDisplay(alertData) {
-        if (displayedAlertIds.has(alertData.notificationId)) {
+        // console.log("Attempting to add alert:", alertData.notificationId); // לוג נוסף
+        if (displayedAlerts.has(alertData.notificationId)) {
+          // console.log("Alert already displayed:", alertData.notificationId); // לוג נוסף
           return; // התרעה זו כבר הוצגה
         }
 
         const message = createAlertMessage(alertData);
         const listItem = document.createElement("li");
         listItem.classList.add("alert-item");
+        listItem.dataset.notificationId = alertData.notificationId; // שמור את ה-ID על האלמנט
+
         listItem.innerHTML = `<div class="alert-text">${message}</div>`;
 
         // הוסף את ההתרעה לראש הרשימה
         alertsList.prepend(listItem);
-        displayedAlertIds.add(alertData.notificationId); // הוסף לסט ההתרעות שהוצגו
+        displayedAlerts.set(alertData.notificationId, listItem); // הוסף למפה
 
         // הוסף את הקלאס new-alert להפעלת אנימציית ה-pulse
         listItem.classList.add('new-alert');
@@ -281,22 +283,17 @@
         // וודא שלא נציג יותר מדי התרעות - הסר את הישנה ביותר
         while (alertsList.children.length > MAX_ALERTS_DISPLAY) {
           const oldestItem = alertsList.lastChild;
-          // הפעל אנימציית יציאה לפני הסרה
-          oldestItem.style.animation = 'fadeOutAndShrink 0.5s ease-out forwards';
-          oldestItem.addEventListener('animationend', () => {
-            // הסר את ה-ID שלה מסט ההתרעות שהוצגו
-            // נשתמש בגישה בטוחה יותר להסרת ה-ID המתאים
-            const removedAlertId = Array.from(displayedAlertIds).find(id => {
-                // נניח שההתרעות מסודרות לפי סדר הוספה ושהאחרונה ברשימה היא הישנה ביותר
-                // זה דורש ש-Set ישמור על סדר הכניסה, מה שלא מובטח באופן מוחלט
-                // פתרון טוב יותר יהיה לשמור את ה-ID כדאטא-אטריביוט על ה-li
-                return true; // פשוט נסיר את הישן ביותר כפי שרשימת ה-DOM מנוהלת
-            });
-            if (removedAlertId) {
-                displayedAlertIds.delete(removedAlertId);
-            }
-            oldestItem.remove();
-          }, { once: true });
+          if (oldestItem) {
+              const oldestId = oldestItem.dataset.notificationId;
+              // הפעל אנימציית יציאה לפני הסרה
+              oldestItem.style.animation = 'fadeOutAndShrink 0.5s ease-out forwards';
+              oldestItem.addEventListener('animationend', () => {
+                if (oldestId && displayedAlerts.has(oldestId)) { // וודא שקיים לפני מחיקה מהמפה
+                    displayedAlerts.delete(oldestId);
+                }
+                oldestItem.remove();
+              }, { once: true });
+          }
         }
       }
 
@@ -307,13 +304,18 @@
         try {
           const response = await fetch(ALERTS_API_URL);
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
           }
           const alerts = await response.json();
 
-          // רק התרעות חדשות (שלא הוצגו עדיין)
-          // ה-API מחזיר את החדשות ביותר ראשונות, אז נטפל בהן בסדר הזה.
-          // חשוב: נבדוק מהסוף להתחלה כדי שההתרעות החדשות יתווספו נכון לראש הרשימה.
+          if (!Array.isArray(alerts)) {
+              throw new Error("API response is not an array. Response received:", alerts); // לוג נוסף
+          }
+          // console.log("API fetched successfully. Alerts received:", alerts.length); // לוג נוסף
+
+          // מציג התרעות מהחדשה ביותר לישנה ביותר
+          // ה-API כנראה מחזיר אותן כבר בסדר הנכון (הכי חדש ראשון),
+          // אבל נריץ בלולאה הפוכה כדי להוסיף לראש ה-UL
           for (let i = alerts.length - 1; i >= 0; i--) {
             const alert = alerts[i];
             addAlertToDisplay(alert);
@@ -321,8 +323,17 @@
 
         } catch (error) {
           console.error("Error fetching alerts:", error);
-          // ניתן להציג הודעת שגיאה על המסך אם רוצים
-          // לדוגמה: alertsList.innerHTML = `<li class="alert-item" style="background-color: #f39c12; font-size: 1.5em; padding: 15px;">שגיאת טעינה: ודא חיבור לרשת או נסה שוב.</li>`;
+          // הצג הודעת שגיאה על המסך כדי שהמשתמש יראה
+          const errorLi = document.createElement("li");
+          errorLi.classList.add("alert-item");
+          errorLi.style.backgroundColor = "#f39c12"; /* צבע אזהרה */
+          errorLi.style.fontSize = "1.5em";
+          errorLi.style.padding = "15px";
+          errorLi.textContent = `שגיאה בטעינת התרעות: ${error.message}. ודא חיבור לרשת או נסה שוב.`;
+          // נקה התרעות קיימות והצג רק את השגיאה
+          alertsList.innerHTML = ''; // מנקה את כל ההתרעות הקיימות
+          alertsList.appendChild(errorLi);
+          displayedAlerts.clear(); // נקה את מפת ההתרעות שהוצגו
         }
       }
 
