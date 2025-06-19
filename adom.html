@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>טיטוס - התרעות בזמן אמת</title>
+    <title>NewsE - התרעות בזמן אמת</title>
     <link rel="icon" href="https://i.postimg.cc/3r45Jr7M/13.png" type="image/png" />
 
     <link href="https://fonts.googleapis.com/css?family=Assistant:400,700&display=swap" rel="stylesheet">
@@ -266,15 +266,8 @@
 
       // ממפה מספרי איום לתיאורים מובנים
       const THREAT_MAP = {
-        1: "ירי קטיושות",
-        2: "חדירת כלי טיס עוין",
-        3: "רעידת אדמה",
-        4: "אירוע חומרים מסוכנים",
-        5: "ירי רקטות וטילים",
-        6: "צונאמי",
-        7: "שטפונות",
-        8: "שריפה",
-        9: "אחר",
+        1: "חדירת כלי טיס עוין",
+        0: "ירי רקטות וטילים",
       };
 
       /**
@@ -297,7 +290,7 @@
        */
       function createAlertMessage(alertData) {
         const time = formatTimeWithSeconds(alertData.time);
-        const threatDesc = THREAT_MAP[alertData.threat] || "איום לא ידוע";
+        const threatDesc = THREAT_MAP[alertData.threat] || "איום לא מזוהה";
         const cities = alertData.cities && alertData.cities.length > 0 ? alertData.cities.join(', ') : "אזורים שונים";
         const drillStatus = alertData.isDrill ? " - תרגיל" : "";
 
