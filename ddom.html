@@ -253,6 +253,141 @@
             .no-alerts-message { font-size: 1.2em; padding: 10px 15px; }
             .unviewable-alerts-message { font-size: 1.2em; padding: 10px 15px; }
         }
+
+        /* --- חלונית מסך מלא --- */
+        .fullscreen-prompt {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.95); /* רקע כהה שקוף */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* מעל הכל */
+            color: #f0f0f0;
+            text-align: center;
+            transition: opacity 0.5s ease-out;
+            opacity: 0; /* נסתר בהתחלה */
+            pointer-events: none; /* לא לחיץ בהתחלה */
+        }
+
+        .fullscreen-prompt.visible {
+            opacity: 1;
+            pointer-events: all; /* לחיץ כשגלוי */
+        }
+
+        .fullscreen-prompt-content {
+            background-color: #1a1a1a;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+            max-width: 80%;
+            transform: scale(0.9);
+            opacity: 0;
+            animation: popIn 0.5s forwards ease-out;
+            border: 2px solid #555;
+            position: relative;
+        }
+
+        .fullscreen-prompt.visible .fullscreen-prompt-content {
+            animation: popIn 0.5s forwards ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .fullscreen-prompt h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #e74c3c;
+            font-weight: 700;
+        }
+
+        .fullscreen-prompt p {
+            font-size: 1.4em;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            color: #ccc;
+        }
+
+        .fullscreen-prompt .logo-small {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(0.95); }
+        }
+
+        .fullscreen-prompt button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .fullscreen-prompt button:hover {
+            background-color: #2ecc71;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.6);
+        }
+
+        .fullscreen-prompt button:active {
+            transform: translateY(0);
+        }
+
+        /* רספונסיביות לחלונית */
+        @media (max-width: 768px) {
+            .fullscreen-prompt-content {
+                padding: 25px;
+                max-width: 90%;
+            }
+            .fullscreen-prompt h2 {
+                font-size: 2em;
+            }
+            .fullscreen-prompt p {
+                font-size: 1.1em;
+            }
+            .fullscreen-prompt button {
+                font-size: 1.2em;
+                padding: 12px 25px;
+            }
+            .fullscreen-prompt .logo-small {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        @media (max-width: 480px) {
+            .fullscreen-prompt-content {
+                padding: 20px;
+            }
+            .fullscreen-prompt h2 {
+                font-size: 1.8em;
+            }
+            .fullscreen-prompt p {
+                font-size: 1em;
+            }
+            .fullscreen-prompt button {
+                font-size: 1em;
+                padding: 10px 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -269,6 +404,15 @@
         </ul>
     </div>
 
+    <div class="fullscreen-prompt" id="fullscreen-prompt">
+        <div class="fullscreen-prompt-content">
+            <img src="https://i.postimg.cc/3r45Jr7M/13.png" alt="לוגו" class="logo-small" />
+            <h2>לצפייה מיטבית</h2>
+            <p>אנא עבור/י למצב <strong>מסך מלא</strong> כדי ליהנות מחוויה מלאה ולקבל את ההתרעות בצורה ברורה.</p>
+            <button id="fullscreen-button">עבור/י למסך מלא</button>
+        </div>
+    </div>
+
     <script>
         const ALERTS_API_URL = "/api/notifications"; // מופנה לפרוקסי ב-Netlify
         // הכתובת החדשה לפרוקסי של היסטוריית ההתרעות
@@ -280,6 +424,8 @@
         const splashScreen = document.getElementById("splash-screen");
         const fullScreenContainer = document.getElementById("full-screen-container");
         const alertsList = document.getElementById("alerts-list");
+        const fullscreenPrompt = document.getElementById("fullscreen-prompt");
+        const fullscreenButton = document.getElementById("fullscreen-button");
 
         let displayedAlerts = new Map(); // מפה של notificationId ל-DOM element
         let currentViewableAlertsCount = 0; // מונה התרעות הניתנות להצגה כרגע
@@ -567,18 +713,78 @@
             }
         }
 
+        // --- פונקציות מסך מלא ---
+        function enterFullScreen() {
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen();
+            } else if (docEl.mozRequestFullScreen) { // Firefox
+                docEl.mozRequestFullScreen();
+            } else if (docEl.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                docEl.webkitRequestFullscreen();
+            } else if (docEl.msRequestFullscreen) { // IE/Edge
+                docEl.msRequestFullscreen();
+            }
+        }
+
+        function exitFullScreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) { // Firefox
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) { // Chrome, Safari and Opera
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { // IE/Edge
+                document.msExitFullscreen();
+            }
+        }
+
+        function isFullScreen() {
+            return document.fullscreenElement ||
+                   document.mozFullScreenElement ||
+                   document.webkitFullscreenElement ||
+                   document.msFullscreenElement;
+        }
+
+        function toggleFullscreenPrompt() {
+            if (isFullScreen()) {
+                fullscreenPrompt.classList.remove("visible");
+            } else {
+                // רק אם מסך הפתיחה סיים ונעלם
+                if (splashScreen.classList.contains("hidden")) {
+                    fullscreenPrompt.classList.add("visible");
+                }
+            }
+        }
+
+        // Event listener לשינויים במצב מסך מלא
+        document.addEventListener('fullscreenchange', toggleFullscreenPrompt);
+        document.addEventListener('webkitfullscreenchange', toggleFullscreenPrompt);
+        document.addEventListener('mozfullscreenchange', toggleFullscreenPrompt);
+        document.addEventListener('MSFullscreenChange', toggleFullscreenPrompt);
+
+        // Event listener לכפתור מסך מלא בחלונית
+        fullscreenButton.addEventListener('click', () => {
+            enterFullScreen();
+        });
+
+        // Event listener לטיפול בטעינת העמוד ופתיחת מסך הפתיחה
         document.addEventListener("DOMContentLoaded", () => {
             fetchAlerts();
 
             setTimeout(() => {
                 splashScreen.classList.add("hidden");
-                fullScreenContainer.classList.add("visible");
-                setInterval(fetchAlerts, UPDATE_INTERVAL_MS);
-                setTimeout(() => {
-                    if (displayedAlerts.size === 0 && !document.querySelector('.no-alerts-message') && !document.querySelector('.unviewable-alerts-message')) {
-                        checkAndDisplayNoAlertsMessage();
-                    }
-                }, 500);
+                // המתן שהספלאש יעלם לפני שהמיכל הראשי מופיע ובודק מצב מסך מלא
+                splashScreen.addEventListener('transitionend', () => {
+                    fullScreenContainer.classList.add("visible");
+                    setInterval(fetchAlerts, UPDATE_INTERVAL_MS);
+                    setTimeout(() => {
+                        if (displayedAlerts.size === 0 && !document.querySelector('.no-alerts-message') && !document.querySelector('.unviewable-alerts-message')) {
+                            checkAndDisplayNoAlertsMessage();
+                        }
+                        toggleFullscreenPrompt(); // בדוק מצב מסך מלא לאחר טעינה מלאה
+                    }, 500); // עיכוב קצר לוודא שה-DOM הסתדר
+                }, { once: true });
             }, SPLASH_SCREEN_DURATION_MS);
         });
     </script>
