@@ -1,177 +1,178 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NewsE - התרעות בזמן אמת</title>
-    <link rel="icon" href="https://i.postimg.cc/3r45Jr7M/13.png" type="image/png" />
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NewsE - התרעות בזמן אמת</title>
+    <link rel="icon" href="https://i.postimg.cc/3r45Jr7M/13.png" type="image/png" />
 
-    <link href="https://fonts.googleapis.com/css?family=Assistant:400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Assistant:400,700&display=swap" rel="stylesheet">
 
-    <style>
-      /* --- כללי ואיפוס --- */
-      body, html {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden; /* מונע פסי גלילה */
-        font-family: 'Assistant', sans-serif;
-        background-color: #0d0d0d; /* רקע שחור עמוק */
-        color: #f0f0f0; /* טקסט בהיר */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative; /* עבור שכבות אנימציה */
-      }
+    <style>
+        /* --- כללי ואיפוס --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* מונע פסי גלילה */
+            font-family: 'Assistant', sans-serif;
+            background-color: #0d0d0d; /* רקע שחור עמוק */
+            color: #f0f0f0; /* טקסט בהיר */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative; /* עבור שכבות אנימציה */
+        }
 
-      /* --- מסך טעינה / פתיחה --- */
-      .splash-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: #0d0d0d; /* שחור כהה */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000; /* וודא שהוא מעל הכל */
-        opacity: 1;
-        /* transition: opacity 1s ease-out; -- אנימציית ההתפוגגות תטופל בקלאס hidden */
-      }
+        /* --- מסך טעינה / פתיחה --- */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0d0d0d; /* שחור כהה */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* וודא שהוא מעל הכל */
+            opacity: 1;
+            /* transition: opacity 1s ease-out; -- אנימציית ההתפוגגות תטופל בקלאס hidden */
+        }
 
-      .splash-logo {
-        width: 150px;
-        height: 150px;
-        animation: pulseAndGrow 2s infinite ease-in-out; /* רק פעימה וגדילה */
-      }
+        .splash-logo {
+            width: 150px;
+            height: 150px;
+            animation: pulseAndGrow 2s infinite ease-in-out; /* רק פעימה וגדילה */
+        }
 
-      @keyframes pulseAndGrow {
-        0% { transform: scale(0.8); opacity: 0.5; }
-        50% { transform: scale(1.1); opacity: 1; }
-        100% { transform: scale(0.8); opacity: 0.5; }
-      }
+        @keyframes pulseAndGrow {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.5; }
+        }
 
-      /* קלאס חדש להסתרת הספלאש עם אנימציה */
-      .splash-screen.hidden {
-        opacity: 0;
-        transition: opacity 0.5s ease-out; /* זמן מעבר קצר יותר */
-        pointer-events: none; /* מונע אינטראקציה אחרי שהתפוגג */
-      }
+        /* קלאס חדש להסתרת הספלאש עם אנימציה */
+        .splash-screen.hidden {
+            opacity: 0;
+            transition: opacity 0.5s ease-out; /* זמן מעבר קצר יותר */
+            pointer-events: none; /* מונע אינטראקציה אחרי שהתפוגג */
+        }
 
-      /* --- מיכל ראשי לאתר --- */
-      .full-screen-container {
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background-color: #0d0d0d; /* רקע שחור כהה */
-        padding: 20px;
-        box-sizing: border-box;
-        opacity: 0; /* נסתר בהתחלה */
-        transform: translateY(50px);
-        transition: opacity 1s ease-out, transform 1s ease-out; /* אנימציית כניסה */
-      }
+        /* --- מיכל ראשי לאתר --- */
+        .full-screen-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #0d0d0d; /* רקע שחור כהה */
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0; /* נסתר בהתחלה */
+            transform: translateY(50px);
+            transition: opacity 1s ease-out, transform 1s ease-out; /* אנימציית כניסה */
+        }
 
-      .full-screen-container.visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
+        .full-screen-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-/* --- כותרת ולוגו ראשיים --- */
-.alert-header {
-  display: flex;
-  flex-direction: column; /* הלוגו מעל הכותרת */
-  align-items: center;
-  margin-bottom: 40px;
-  /* אנימציית fadeInDown כבר קיימת וטובה, נשאיר אותה */
-  animation: fadeInDown 1s ease-out forwards;
-}
+        /* --- כותרת ולוגו ראשיים --- */
+        .alert-header {
+            display: flex;
+            flex-direction: column; /* הלוגו מעל הכותרת */
+            align-items: center;
+            margin-bottom: 40px;
+            /* אנימציית fadeInDown כבר קיימת וטובה, נשאיר אותה */
+            animation: fadeInDown 1s ease-out forwards;
+        }
 
-.main-logo { /* קלאס חדש ללוגו הגדול למעלה */
-  width: 180px; /* הגדלה משמעותית של הלוגו */
-  height: 180px;
-  margin-bottom: 15px; /* מרווח בין הלוגו לכותרת */
-  animation: rotateIn 1s ease-out forwards; /* אנימציית סיבוב נשארת */
-}
+        .main-logo { /* קלאס חדש ללוגו הגדול למעלה */
+            width: 180px; /* הגדלה משמעותית של הלוגו */
+            height: 180px;
+            margin-bottom: 15px; /* מרווח בין הלוגו לכותרת */
+            animation: rotateIn 1s ease-out forwards; /* אנימציית סיבוב נשארת */
+        }
 
-@keyframes rotateIn {
-  from { transform: rotateY(90deg) scale(0.5); opacity: 0; }
-  to { transform: rotateY(0deg) scale(1); opacity: 1; }
-}
+        @keyframes rotateIn {
+            from { transform: rotateY(90deg) scale(0.5); opacity: 0; }
+            to { transform: rotateY(0deg) scale(1); opacity: 1; }
+        }
 
-.header-title {
-  font-size: 3.8em;
-  font-weight: 700;
-  color: #e74c3c; /* צבע אדום נשאר */
-  text-shadow: none; /* הסרת כל צל או זוהר */
-  letter-spacing: 3px;
-  animation: none; /* הסרת כל אנימציית ניאון/זוהר */
-}
+        .header-title {
+            font-size: 3.8em;
+            font-weight: 700;
+            color: #e74c3c; /* צבע אדום נשאר */
+            text-shadow: none; /* הסרת כל צל או זוהר */
+            letter-spacing: 3px;
+            animation: none; /* הסרת כל אנימציית ניאון/זוהר */
+        }
 
-/* --- התאמות רספונסיביות --- */
-/* ודא שהלוגו והכותרת נשארים פרופורציונליים במסכים קטנים */
-@media (max-width: 1200px) {
-  .main-logo { width: 150px; height: 150px; }
-  .header-title { font-size: 3em; }
-}
+        /* --- התאמות רספונסיביות --- */
+        /* ודא שהלוגו והכותרת נשארים פרופורציונליים במסכים קטנים */
+        @media (max-width: 1200px) {
+            .main-logo { width: 150px; height: 150px; }
+            .header-title { font-size: 3em; }
+        }
 
-@media (max-width: 768px) {
-  .main-logo { width: 120px; height: 120px; }
-  .header-title { font-size: 2em; }
-}
+        @media (max-width: 768px) {
+            .main-logo { width: 120px; height: 120px; }
+            .header-title { font-size: 2em; }
+        }
 
-@media (max-width: 480px) {
-  .main-logo { width: 90px; height: 90px; }
-  .header-title { font-size: 1.5em; }
-}
+        @media (max-width: 480px) {
+            .main-logo { width: 90px; height: 90px; }
+            .header-title { font-size: 1.5em; }
+        }
 
-      /* --- רשימת התרעות --- */
-      .alerts-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        width: 90%;
-        max-width: 1000px;
-        text-align: center;
-        perspective: 1000px;
-      }
+        /* --- רשימת התרעות --- */
+        .alerts-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 90%;
+            max-width: 1000px;
+            text-align: center;
+            perspective: 1000px;
+        }
 
-      /* --- פריט התרעה בודד (אדום) --- */
-      .alert-item.active {
-        background-color: #e74c3c; /* אדום בוהק */
-        color: white;
-        padding: 25px 40px;
-        margin-bottom: 25px;
-        border-radius: 15px;
-        font-size: 3em;
-        font-weight: 700;
-        box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6);
-        border: 4px solid #f9f9f9;
-        animation: slideInFromRight 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards,
-                   pulseRed 2s infinite;
-        transform-origin: center center;
-        position: relative;
-        overflow: hidden;
-        cursor: pointer; /* כדי להראות שזה לחיץ */
-      }
+        /* --- פריט התרעה בודד (אדום) --- */
+        .alert-item.active {
+            background-color: #e74c3c; /* אדום בוהק */
+            color: white;
+            padding: 25px 40px;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            font-size: 3em;
+            font-weight: 700;
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6);
+            border: 4px solid #f9f9f9;
+            animation: slideInFromRight 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards,
+                        pulseRed 2s infinite;
+            transform-origin: center center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer; /* כדי להראות שזה לחיץ */
+        }
 
-      /* --- מלבן "אין התרעות" (ירוק) --- */
-      .no-alerts-message {
-        background-color: #27ae60; /* ירוק */
-        color: white;
-        padding: 25px 40px;
-        margin-bottom: 25px;
-        border-radius: 15px;
-        font-size: 2.5em; /* קצת קטן יותר מהתרעה פעילה */
-        font-weight: 700;
-        box-shadow: 0 0 20px rgba(39, 174, 96, 0.7), 0 0 30px rgba(39, 174, 96, 0.4);
-        border: 4px solid #f9f9f9;
-        animation: fadeIn 1s ease-out forwards, pulseGreen 2s infinite; /* אנימציית כניסה והבהוב ירוק */
-      }
+        /* --- מלבן "אין התרעות" (ירוק) --- */
+        .no-alerts-message {
+            background-color: #27ae60; /* ירוק */
+            color: white;
+            padding: 25px 40px;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            font-size: 2.5em; /* קצת קטן יותר מהתרעה פעילה */
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.7), 0 0 30px rgba(39, 174, 96, 0.4);
+            border: 4px solid #f9f9f9;
+            animation: fadeIn 1s ease-out forwards, pulseGreen 2s infinite; /* אנימציית כניסה והבהוב ירוק */
+            cursor: default; /* לא לחיץ */
+        }
 
         /* מלבן עבור התרעות לא ניתנות להצגה או יותר מדי התרעות - כחול */
         .unviewable-alerts-message {
@@ -188,154 +189,154 @@
             cursor: pointer;
         }
 
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-      @keyframes pulseGreen {
-        0% { box-shadow: 0 0 20px rgba(39, 174, 96, 0.7), 0 0 30px rgba(39, 174, 96, 0.4); transform: scale(1); }
-        50% { box-shadow: 0 0 30px rgba(39, 174, 96, 0.9), 0 0 45px rgba(39, 174, 96, 0.6); transform: scale(1.02); }
-        100% { box-shadow: 0 0 20px rgba(39, 174, 96, 0.7), 0 0 30px rgba(39, 174, 96, 0.4); transform: scale(1); }
-      }
+        @keyframes pulseGreen {
+            0% { box-shadow: 0 0 20px rgba(39, 174, 96, 0.7), 0 0 30px rgba(39, 174, 96, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(39, 174, 96, 0.9), 0 0 45px rgba(39, 174, 96, 0.6); transform: scale(1.02); }
+            100% { box-shadow: 0 0 20px rgba(39, 174, 96, 0.7), 0 0 30px rgba(39, 174, 96, 0.4); transform: scale(1); }
+        }
 
-      .alert-item:last-child {
-        margin-bottom: 0;
-      }
+        .alert-item:last-child {
+            margin-bottom: 0;
+        }
 
-      .alert-text {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+        .alert-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-      /* --- אנימציות --- */
-      @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-80px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
+        /* --- אנימציות --- */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-80px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-      @keyframes slideInFromRight {
-        from { opacity: 0; transform: translateX(100%) scale(0.8); }
-        to { opacity: 1; transform: translateX(0) scale(1); }
-      }
+        @keyframes slideInFromRight {
+            from { opacity: 0; transform: translateX(100%) scale(0.8); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
 
-      @keyframes fadeOutAndShrink {
-        from { opacity: 1; transform: scale(1); }
-        to { opacity: 0; transform: scale(0.9) translateY(-20px); }
-      }
+        @keyframes fadeOutAndShrink {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9) translateY(-20px); }
+        }
 
-      @keyframes pulseRed {
-        0% { box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6); transform: scale(1); }
-        50% { box-shadow: 0 0 45px rgba(231, 76, 60, 1), 0 0 70px rgba(231, 76, 60, 0.8); transform: scale(1.02); }
-        100% { box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6); transform: scale(1); }
-      }
+        @keyframes pulseRed {
+            0% { box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6); transform: scale(1); }
+            50% { box-shadow: 0 0 45px rgba(231, 76, 60, 1), 0 0 70px rgba(231, 76, 60, 0.8); transform: scale(1.02); }
+            100% { box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6); transform: scale(1); }
+        }
 
-      /* --- התאמות רספונסיביות --- */
-      @media (max-width: 1200px) {
-        .main-logo { width: 100px; height: 100px; }
-        .header-title { font-size: 3em; }
-        .alert-item.active { font-size: 2.5em; padding: 20px 30px; }
-        .no-alerts-message { font-size: 2em; padding: 20px 30px; }
-        .unviewable-alerts-message { font-size: 2em; padding: 20px 30px; }
-      }
+        /* --- התאמות רספונסיביות --- */
+        @media (max-width: 1200px) {
+            .main-logo { width: 100px; height: 100px; }
+            .header-title { font-size: 3em; }
+            .alert-item.active { font-size: 2.5em; padding: 20px 30px; }
+            .no-alerts-message { font-size: 2em; padding: 20px 30px; }
+            .unviewable-alerts-message { font-size: 2em; padding: 20px 30px; }
+        }
 
-      @media (max-width: 768px) {
-        .main-logo { width: 80px; height: 80px; }
-        .header-title { font-size: 2em; }
-        .alert-item.active { font-size: 1.8em; padding: 15px 25px; }
-        .no-alerts-message { font-size: 1.5em; padding: 15px 25px; }
-        .unviewable-alerts-message { font-size: 1.5em; padding: 15px 25px; }
-      }
+        @media (max-width: 768px) {
+            .main-logo { width: 80px; height: 80px; }
+            .header-title { font-size: 2em; }
+            .alert-item.active { font-size: 1.8em; padding: 15px 25px; }
+            .no-alerts-message { font-size: 1.5em; padding: 15px 25px; }
+            .unviewable-alerts-message { font-size: 1.5em; padding: 15px 25px; }
+        }
 
-      @media (max-width: 480px) {
-        .main-logo { width: 60px; height: 60px; }
-        .header-title { font-size: 1.5em; }
-        .alert-item.active { font-size: 1.3em; padding: 10px 15px; }
-        .no-alerts-message { font-size: 1.2em; padding: 10px 15px; }
-        .unviewable-alerts-message { font-size: 1.2em; padding: 10px 15px; }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="splash-screen" id="splash-screen">
-      <img src="https://i.postimg.cc/3r45Jr7M/13.png" alt="טיטוס לוגו" class="splash-logo" />
-    </div>
+        @media (max-width: 480px) {
+            .main-logo { width: 60px; height: 60px; }
+            .header-title { font-size: 1.5em; }
+            .alert-item.active { font-size: 1.3em; padding: 10px 15px; }
+            .no-alerts-message { font-size: 1.2em; padding: 10px 15px; }
+            .unviewable-alerts-message { font-size: 1.2em; padding: 10px 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-screen" id="splash-screen">
+        <img src="https://i.postimg.cc/3r45Jr7M/13.png" alt="טיטוס לוגו" class="splash-logo" />
+    </div>
 
-    <div class="full-screen-container" id="full-screen-container">
-      <div class="alert-header">
-        <img src="https://i.postimg.cc/3r45Jr7M/13.png" alt="טיטוס לוגו" class="main-logo" />
-        <h1 class="header-title">התרעות בזמן אמת</h1>
-      </div>
-      <ul class="alerts-list" id="alerts-list">
-      </ul>
-    </div>
+    <div class="full-screen-container" id="full-screen-container">
+        <div class="alert-header">
+            <img src="https://i.postimg.cc/3r45Jr7M/13.png" alt="טיטוס לוגו" class="main-logo" />
+            <h1 class="header-title">התרעות בזמן אמת</h1>
+        </div>
+        <ul class="alerts-list" id="alerts-list">
+        </ul>
+    </div>
 
-    <script>
-      const ALERTS_API_URL = "/api/notifications"; // מופנה לפרוקסי ב-Netlify
-      const UPDATE_INTERVAL_MS = 1000; // כל 1 שנייה
-      const MAX_ALERTS_DISPLAY = 3; // מספר ההתרעות המקסימלי שיוצגו (לפני מעבר למצב "לא ניתן להציג")
-      const SPLASH_SCREEN_DURATION_MS = 2500; // משך זמן מסך הפתיחה
+    <script>
+        const ALERTS_API_URL = "/api/notifications"; // מופנה לפרוקסי ב-Netlify
+        const UPDATE_INTERVAL_MS = 1000; // כל 1 שנייה
+        const MAX_ALERTS_DISPLAY = 3; // מספר ההתרעות המקסימלי שיוצגו (לפני מעבר למצב "לא ניתן להציג")
+        const SPLASH_SCREEN_DURATION_MS = 2500; // משך זמן מסך הפתיחה
 
-      const splashScreen = document.getElementById("splash-screen");
-      const fullScreenContainer = document.getElementById("full-screen-container");
-      const alertsList = document.getElementById("alerts-list");
+        const splashScreen = document.getElementById("splash-screen");
+        const fullScreenContainer = document.getElementById("full-screen-container");
+        const alertsList = document.getElementById("alerts-list");
 
-      let displayedAlerts = new Map(); // מפה של notificationId ל-DOM element
-      let currentViewableAlertsCount = 0; // מונה התרעות הניתנות להצגה כרגע
-      let lastSeenNotificationId = null; // ישמור את ה-notificationId האחרון שהוצג (עבור המלבן הכחול)
+        let displayedAlerts = new Map(); // מפה של notificationId ל-DOM element
+        let currentViewableAlertsCount = 0; // מונה התרעות הניתנות להצגה כרגע
+        let lastSeenNotificationId = null; // ישמור את ה-notificationId האחרון שהוצג (עבור המלבן הכחול)
 
-      // ממפה מספרי איום לתיאורים מובנים
-      const THREAT_MAP = {
-        1: "חדירת כלי טיס עוין",
-        0: "ירי רקטות וטילים",
-        // כל איום אחר שאינו ברשימת VIEWABLE_THREAT_TYPES ייחשב "לא ניתן להצגה"
-      };
+        // ממפה מספרי איום לתיאורים מובנים
+        const THREAT_MAP = {
+            1: "חדירת כלי טיס עוין",
+            0: "ירי רקטות וטילים",
+            // כל איום אחר שאינו ברשימת VIEWABLE_THREAT_TYPES ייחשב "לא ניתן להצגה"
+        };
 
         // סוגי איום שניתן להציג במסך זה (ניתן להרחבה)
         // כל איום שאינו כאן יגרום למלבן "לא ניתן להציג..."
         const VIEWABLE_THREAT_TYPES = new Set([0, 1]);
 
-      /**
-       * ממיר חותמת זמן UNIX לשעה מקומית בפורמט HH:MM:SS
-       * @param {number} unixTimestamp חותמת זמן בפורמט UNIX (שניות)
-       * @returns {string} שעה בפורמט HH:MM:SS
-       */
-      function formatTimeWithSeconds(unixTimestamp) {
-        const date = new Date(unixTimestamp * 1000); // ממיר משניות למילישניות
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${hours}:${minutes}:${seconds}`;
-      }
-
-      /**
-       * יוצר הודעת התרעה קריאה מנתוני ה-API.
-       * @param {Object} alertData - אובייקט התרעה מה-API.
-       * @param {boolean} isViewable - האם ההתרעה ניתנת להצגה ישירה במסך זה.
-       * @returns {string} - מחרוזת ההתרעה המעוצבת.
-       */
-      function createAlertMessage(alertData, isViewable) {
-        if (!isViewable) {
-          return `לא ניתן להציג במסך זה התראה זו, למעבר לצפייה בהתראה לחץ כאן`;
-        }
-        const time = formatTimeWithSeconds(alertData.time);
-        const threatDesc = THREAT_MAP[alertData.threat] || "איום לא מזוהה";
-        
-        // שינוי: רק יישוב אחד, או "מספר יישובים"
-        let citiesDisplay;
-        if (alertData.cities && alertData.cities.length === 1) {
-            citiesDisplay = alertData.cities[0];
-        } else if (alertData.cities && alertData.cities.length > 1) {
-            citiesDisplay = `מספר יישובים (${alertData.cities[0]} ועוד...)`;
-        } else {
-            citiesDisplay = "אזורים שונים";
+        /**
+         * ממיר חותמת זמן UNIX לשעה מקומית בפורמט HH:MM:SS
+         * @param {number} unixTimestamp חותמת זמן בפורמט UNIX (שניות)
+         * @returns {string} שעה בפורמט HH:MM:SS
+         */
+        function formatTimeWithSeconds(unixTimestamp) {
+            const date = new Date(unixTimestamp * 1000); // ממיר משניות למילישניות
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
         }
-        
-        const drillStatus = alertData.isDrill ? " - תרגיל" : "";
 
-        return `${citiesDisplay}: ${threatDesc}${drillStatus} (${time})`;
-      }
+        /**
+         * יוצר הודעת התרעה קריאה מנתוני ה-API.
+         * @param {Object} alertData - אובייקט התרעה מה-API.
+         * @param {boolean} isViewable - האם ההתרעה ניתנת להצגה ישירה במסך זה.
+         * @returns {string} - מחרוזת ההתרעה המעוצבת.
+         */
+        function createAlertMessage(alertData, isViewable) {
+            if (!isViewable) {
+                return `לא ניתן להציג במסך זה התראה זו, למעבר לצפייה בהתראה לחץ כאן`;
+            }
+            const time = formatTimeWithSeconds(alertData.time);
+            const threatDesc = THREAT_MAP[alertData.threat] || "איום לא מזוהה";
+            
+            // שינוי: רק יישוב אחד, או "מספר יישובים"
+            let citiesDisplay;
+            if (alertData.cities && alertData.cities.length === 1) {
+                citiesDisplay = alertData.cities[0];
+            } else if (alertData.cities && alertData.cities.length > 1) {
+                citiesDisplay = `מספר יישובים (${alertData.cities[0]} ועוד...)`;
+            } else {
+                citiesDisplay = "אזורים שונים";
+            }
+            
+            const drillStatus = alertData.isDrill ? " - תרגיל" : "";
+
+            return `${citiesDisplay}: ${threatDesc}${drillStatus} (${time})`;
+        }
 
         /**
          * מנווטת ל-URL של התרעה ספציפית ב-tzevaadom.co.il.
@@ -395,212 +396,211 @@
             alertsList.appendChild(unviewableBlock);
         }
 
-      /**
-       * מוסיף התרעה חדשה לתצוגה הראשית.
-       * @param {Object} alertData - אובייקט ההתרעה מה-API.
-       */
-      function addAlertToDisplay(alertData) {
-        if (displayedAlerts.has(alertData.notificationId)) {
-          return; // התרעה זו כבר הוצגה
-        }
+        /**
+         * מוסיף התרעה חדשה לתצוגה הראשית.
+         * @param {Object} alertData - אובייקט ההתרעה מה-API.
+         */
+        function addAlertToDisplay(alertData) {
+            if (displayedAlerts.has(alertData.notificationId)) {
+                return; // התרעה זו כבר הוצגה
+            }
 
-        // אם כבר יש מלבן "לא ניתן להציג" (מצב חריגה), אל תוסיף כלום
-        if (document.querySelector('.unviewable-alerts-message')) {
-            return;
-        }
+            // אם כבר יש מלבן "לא ניתן להציג" (מצב חריגה), אל תוסיף כלום
+            if (document.querySelector('.unviewable-alerts-message')) {
+                return;
+            }
 
-        const isThreatViewable = VIEWABLE_THREAT_TYPES.has(alertData.threat);
-        
-        // נבדוק האם הוספת התרעה זו תגרום לחריגה מ-MAX_ALERTS_DISPLAY
-        // אם היא היתה ניתנת להצגה והיא תגרום ליותר מ-3 התרעות, נציג את המלבן הכחול
-        if (isThreatViewable && currentViewableAlertsCount >= MAX_ALERTS_DISPLAY) {
-            displayUnviewableAlertBlock(alertData.notificationId);
-            lastSeenNotificationId = alertData.notificationId; // שמור את ה-ID האחרון
-            return; // אל תוסיף את ההתרעה הנוכחית
-        }
+            const isThreatViewable = VIEWABLE_THREAT_TYPES.has(alertData.threat);
+            
+            // נבדוק האם הוספת התרעה זו תגרום לחריגה מ-MAX_ALERTS_DISPLAY
+            // אם היא היתה ניתנת להצגה והיא תגרום ליותר מ-3 התרעות, נציג את המלבן הכחול
+            if (isThreatViewable && currentViewableAlertsCount >= MAX_ALERTS_DISPLAY) {
+                displayUnviewableAlertBlock(alertData.notificationId);
+                lastSeenNotificationId = alertData.notificationId; // שמור את ה-ID האחרון
+                return; // אל תוסיף את ההתרעה הנוכחית
+            }
 
-        // אם ההתרעה הנוכחית עצמה אינה ניתנת להצגה
-        if (!isThreatViewable) {
-            displayUnviewableAlertBlock(alertData.notificationId);
-            lastSeenNotificationId = alertData.notificationId; // שמור את ה-ID האחרון
-            return; // אל תוסיף את ההתרעה הנוכחית
-        }
+            // אם ההתרעה הנוכחית עצמה אינה ניתנת להצגה
+            if (!isThreatViewable) {
+                displayUnviewableAlertBlock(alertData.notificationId);
+                lastSeenNotificationId = alertData.notificationId; // שמור את ה-ID האחרון
+                return; // אל תוסיף את ההתרעה הנוכחית
+            }
 
+            // אם הגענו לכאן, זה אומר שהתרעה ניתנת להצגה ועדיין לא חרגנו מהמגבלה
+            const message = createAlertMessage(alertData, true); // true כי היא ניתנת להצגה
+            const listItem = document.createElement("li");
+            listItem.classList.add("alert-item", "active"); // הוסף קלאס "active"
+            listItem.dataset.notificationId = alertData.notificationId; // שמור את ה-ID על האלמנט
 
-        // אם הגענו לכאן, זה אומר שהתרעה ניתנת להצגה ועדיין לא חרגנו מהמגבלה
-        const message = createAlertMessage(alertData, true); // true כי היא ניתנת להצגה
-        const listItem = document.createElement("li");
-        listItem.classList.add("alert-item", "active"); // הוסף קלאס "active"
-        listItem.dataset.notificationId = alertData.notificationId; // שמור את ה-ID על האלמנט
+            listItem.innerHTML = `<div class="alert-text">${message}</div>`;
 
-        listItem.innerHTML = `<div class="alert-text">${message}</div>`;
+            // הוסף אירוע לחיצה לכל מלבן התרעה
+            listItem.addEventListener('click', () => {
+                navigateToAlert(alertData.notificationId); // קורא לפונקציית הניווט עם ה-alertId
+            });
 
-        // הוסף אירוע לחיצה לכל מלבן התרעה
-        listItem.addEventListener('click', () => {
-            navigateToAlert(alertData.notificationId); // קורא לפונקציית הניווט עם ה-alertId
-        });
+            // נקה הודעת "אין התרעות" אם קיימת
+            const noAlertsEl = document.querySelector('.no-alerts-message');
+            if (noAlertsEl) {
+                noAlertsEl.remove();
+            }
 
-        // נקה הודעת "אין התרעות" אם קיימת
-        const noAlertsEl = document.querySelector('.no-alerts-message');
-        if (noAlertsEl) {
-          noAlertsEl.remove();
-        }
+            alertsList.prepend(listItem);
+            displayedAlerts.set(alertData.notificationId, listItem);
+            currentViewableAlertsCount++; // הגדל את מונה ההתרעות הניתנות להצגה
 
-        alertsList.prepend(listItem);
-        displayedAlerts.set(alertData.notificationId, listItem);
-        currentViewableAlertsCount++; // הגדל את מונה ההתרעות הניתנות להצגה
+            // הוסף את הקלאס new-alert להפעלת אנימציית ה-pulse
+            listItem.classList.add('new-alert');
+            setTimeout(() => {
+                listItem.classList.remove('new-alert');
+            }, 3000);
 
-        // הוסף את הקלאס new-alert להפעלת אנימציית ה-pulse
-        listItem.classList.add('new-alert');
-        setTimeout(() => {
-          listItem.classList.remove('new-alert');
-        }, 3000);
-
-        // וודא שלא נציג יותר מדי התרעות - הסר את הישנה ביותר
-        // (התנהגות זו מתייחסת כעת רק למצב שבו יש עד 3 התרעות)
-        while (alertsList.children.length > MAX_ALERTS_DISPLAY) {
-          const oldestItem = alertsList.lastChild;
-            // וודא שאנחנו לא מסירים את המלבן הכחול אם הוא שם (לא אמור להגיע לפה, אבל ליתר ביטחון)
-            if (oldestItem && (oldestItem.classList.contains('active') || oldestItem.classList.contains('unviewable-alerts-message'))) { 
-                // אם הגענו לכאן, זה פריט התרעה פעיל ואנחנו מעל המגבלה.
-                // נסיר אותו רק אם הוא לא המלבן הכחול
-                if (!oldestItem.classList.contains('unviewable-alerts-message')) {
-                    const oldestId = oldestItem.dataset.notificationId;
-                    oldestItem.style.animation = 'fadeOutAndShrink 0.5s ease-out forwards';
-                    oldestItem.addEventListener('animationend', () => {
-                        if (oldestId && displayedAlerts.has(oldestId)) {
-                            displayedAlerts.delete(oldestId);
-                        }
+            // וודא שלא נציג יותר מדי התרעות - הסר את הישנה ביותר
+            // (התנהגות זו מתייחסת כעת רק למצב שבו יש עד 3 התרעות)
+            while (alertsList.children.length > MAX_ALERTS_DISPLAY) {
+                const oldestItem = alertsList.lastChild;
+                // וודא שאנחנו לא מסירים את המלבן הכחול אם הוא שם (לא אמור להגיע לפה, אבל ליתר ביטחון)
+                if (oldestItem && (oldestItem.classList.contains('active') || oldestItem.classList.contains('unviewable-alerts-message'))) { 
+                    // אם הגענו לכאן, זה פריט התרעה פעיל ואנחנו מעל המגבלה.
+                    // נסיר אותו רק אם הוא לא המלבן הכחול
+                    if (!oldestItem.classList.contains('unviewable-alerts-message')) {
+                        const oldestId = oldestItem.dataset.notificationId;
+                        oldestItem.style.animation = 'fadeOutAndShrink 0.5s ease-out forwards';
+                        oldestItem.addEventListener('animationend', () => {
+                            if (oldestId && displayedAlerts.has(oldestId)) {
+                                displayedAlerts.delete(oldestId);
+                            }
+                            oldestItem.remove();
+                            currentViewableAlertsCount--; // הקטן את המונה
+                            checkAndDisplayNoAlertsMessage(); // בדוק אם צריך להציג הודעת "אין התרעות" אחרי הסרה
+                        }, { once: true });
+                    } else {
+                        // אם ה-lastChild הוא המלבן הכחול, פשוט הסר אותו ולא תמשיך בלולאה
                         oldestItem.remove();
-                        currentViewableAlertsCount--; // הקטן את המונה
-                        checkAndDisplayNoAlertsMessage(); // בדוק אם צריך להציג הודעת "אין התרעות" אחרי הסרה
-                    }, { once: true });
+                        break; 
+                    }
                 } else {
-                    // אם ה-lastChild הוא המלבן הכחול, פשוט הסר אותו ולא תמשיך בלולאה
+                    // אם ה-lastChild הוא לא פריט התרעה פעיל, פשוט הסר אותו
                     oldestItem.remove();
-                    break; 
                 }
-            } else {
-                // אם ה-lastChild הוא לא פריט התרעה פעיל, פשוט הסר אותו
-              oldestItem.remove();
-          }
-        }
-      }
-
-      /**
-       * מציג הודעת "אין התרעות" אם רשימת ההתרעות ריקה.
-       */
-      function checkAndDisplayNoAlertsMessage() {
-        // וודא שאין מלבן כחול או ירוק כבר מוצג
-        if (alertsList.children.length === 0 && !document.querySelector('.no-alerts-message') && !document.querySelector('.unviewable-alerts-message')) {
-          const noAlertsMessage = document.createElement("li");
-          noAlertsMessage.classList.add("no-alerts-message");
-          noAlertsMessage.textContent = "אין כרגע התרעות - הכל שקט ובטוח!";
-          alertsList.appendChild(noAlertsMessage);
-        }
-      }
-
-      /**
-       * מאחזר את ההתרעות מה-API ומעדכן את התצוגה.
-       */
-      async function fetchAlerts() {
-        try {
-          const response = await fetch(ALERTS_API_URL);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-          }
-          const alerts = await response.json();
-
-          if (!Array.isArray(alerts)) {
-              throw new Error("API response is not an array. Response received:", alerts);
-          }
-
-            // שמור את ה-ID של ההתרעות שהיו קיימות לפני העדכון
-            const previousAlertIds = new Set(displayedAlerts.keys());
-
-            // חשב כמה התרעות חדשות ניתנות להצגה הגיעו
-            const newViewableAlerts = alerts.filter(alert => 
-                VIEWABLE_THREAT_TYPES.has(alert.threat) && !displayedAlerts.has(alert.notificationId)
-            );
-
-            // אם יש התראה חדשה שאינה ניתנת להצגה
-            const newUnviewableAlert = alerts.find(alert => 
-                !VIEWABLE_THREAT_TYPES.has(alert.threat) && !displayedAlerts.has(alert.notificationId)
-            );
-
-            // אם יש יותר מדי התרעות אקטיביות חדשות, או התראה חדשה לא ניתנת להצגה
-            // נציג את המלבן הכחול ונפסיק
-            if (newUnviewableAlert || (currentViewableAlertsCount + newViewableAlerts.length > MAX_ALERTS_DISPLAY)) {
-                // נספק את ה-ID של ההתרעה החדשה האחרונה, אם קיימת, או את ה-ID האחרון שראינו
-                const idForLink = newUnviewableAlert ? newUnviewableAlert.notificationId : 
-                                  (alerts.length > 0 ? alerts[0].notificationId : lastSeenNotificationId);
-                displayUnviewableAlertBlock(idForLink);
-                lastSeenNotificationId = idForLink; // עדכן את ה-ID האחרון שנצפה
-                return; // סיים כאן, רק מלבן כחול יוצג
             }
+        }
 
-            // אם אין חריגה למצב הכחול, נמשיך לעדכן רגיל
-            // הסר התרעות שכבר לא פעילות ב-API מהתצוגה
-            const currentApiIds = new Set(alerts.map(a => a.notificationId));
-            for (const [id, element] of Array.from(displayedAlerts.entries())) { // השתמש ב-Array.from כדי לא לשנות מפה תוך כדי איטרציה
-                if (!currentApiIds.has(id)) {
-                    element.style.animation = 'fadeOutAndShrink 0.5s ease-out forwards';
-                    element.addEventListener('animationend', () => {
-                        displayedAlerts.delete(id);
-                        element.remove();
-                        currentViewableAlertsCount--; // הקטן את המונה
+        /**
+         * מציג הודעת "אין התרעות" אם רשימת ההתרעות ריקה.
+         */
+        function checkAndDisplayNoAlertsMessage() {
+            // וודא שאין מלבן כחול או ירוק כבר מוצג
+            if (alertsList.children.length === 0 && !document.querySelector('.no-alerts-message') && !document.querySelector('.unviewable-alerts-message')) {
+                const noAlertsMessage = document.createElement("li");
+                noAlertsMessage.classList.add("no-alerts-message");
+                noAlertsMessage.textContent = "אין כרגע התרעות - הכל שקט ובטוח!";
+                alertsList.appendChild(noAlertsMessage);
+            }
+        }
+
+        /**
+         * מאחזר את ההתרעות מה-API ומעדכן את התצוגה.
+         */
+        async function fetchAlerts() {
+            try {
+                const response = await fetch(ALERTS_API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                }
+                const alerts = await response.json();
+
+                if (!Array.isArray(alerts)) {
+                    throw new Error("API response is not an array. Response received:", alerts);
+                }
+
+                // שמור את ה-ID של ההתרעות שהיו קיימות לפני העדכון
+                const previousAlertIds = new Set(displayedAlerts.keys());
+
+                // חשב כמה התרעות חדשות ניתנות להצגה הגיעו
+                const newViewableAlerts = alerts.filter(alert => 
+                    VIEWABLE_THREAT_TYPES.has(alert.threat) && !displayedAlerts.has(alert.notificationId)
+                );
+
+                // אם יש התראה חדשה שאינה ניתנת להצגה
+                const newUnviewableAlert = alerts.find(alert => 
+                    !VIEWABLE_THREAT_TYPES.has(alert.threat) && !displayedAlerts.has(alert.notificationId)
+                );
+
+                // אם יש יותר מדי התרעות אקטיביות חדשות, או התראה חדשה לא ניתנת להצגה
+                // נציג את המלבן הכחול ונפסיק
+                if (newUnviewableAlert || (currentViewableAlertsCount + newViewableAlerts.length > MAX_ALERTS_DISPLAY)) {
+                    // נספק את ה-ID של ההתרעה החדשה האחרונה, אם קיימת, או את ה-ID האחרון שראינו
+                    const idForLink = newUnviewableAlert ? newUnviewableAlert.notificationId : 
+                                      (alerts.length > 0 ? alerts[0].notificationId : lastSeenNotificationId);
+                    displayUnviewableAlertBlock(idForLink);
+                    lastSeenNotificationId = idForLink; // עדכן את ה-ID האחרון שנצפה
+                    return; // סיים כאן, רק מלבן כחול יוצג
+                }
+
+                // אם אין חריגה למצב הכחול, נמשיך לעדכן רגיל
+                // הסר התרעות שכבר לא פעילות ב-API מהתצוגה
+                const currentApiIds = new Set(alerts.map(a => a.notificationId));
+                for (const [id, element] of Array.from(displayedAlerts.entries())) { // השתמש ב-Array.from כדי לא לשנות מפה תוך כדי איטרציה
+                    if (!currentApiIds.has(id)) {
+                        element.style.animation = 'fadeOutAndShrink 0.5s ease-out forwards';
+                        element.addEventListener('animationend', () => {
+                            displayedAlerts.delete(id);
+                            element.remove();
+                            currentViewableAlertsCount--; // הקטן את המונה
+                            checkAndDisplayNoAlertsMessage();
+                        }, { once: true });
+                    }
+                }
+
+                // הוסף התרעות חדשות הניתנות להצגה
+                newViewableAlerts.forEach(alert => addAlertToDisplay(alert));
+
+                // אם לא הוספו התרעות ואין התרעות מוצגות, הצג הודעת "אין התרעות"
+                checkAndDisplayNoAlertsMessage();
+
+            } catch (error) {
+                console.error("Error fetching alerts:", error);
+                // הצג הודעת שגיאה על המסך כדי שהמשתמש יראה
+                // במקרה של שגיאה חמורה, נציג מלבן אדום (במקום כחול)
+                const errorLi = document.createElement("li");
+                errorLi.classList.add("alert-item"); // כדי לקבל סטיילינג בסיסי
+                errorLi.style.backgroundColor = "#e74c3c"; /* אדום לשגיאה חמורה */
+                errorLi.style.fontSize = "1.5em";
+                errorLi.style.padding = "15px";
+                errorLi.textContent = `שגיאה חמורה: לא ניתן לטעון התרעות (${error.message}). נסה לרענן.`;
+                alertsList.innerHTML = ''; // נקה הכל
+                alertsList.appendChild(errorLi);
+                displayedAlerts.clear();
+                currentViewableAlertsCount = 0;
+            }
+        }
+
+        // --- אתחול והפעלת טיימר ---
+        document.addEventListener("DOMContentLoaded", () => {
+            // טען התרעות פעם אחת מיד עם טעינת הדף, לפני הצגת האלמנטים
+            // זה מבטיח שהנתונים זמינים ברגע שהמסך הראשי מופיע
+            fetchAlerts();
+
+            // הסתר את מסך הפתיחה וחשוף את התוכן הראשי לאחר זמן קבוע
+            setTimeout(() => {
+                splashScreen.classList.add("hidden"); // התחל להסתיר את הספלאש
+                fullScreenContainer.classList.add("visible"); // התחל להציג את התוכן הראשי
+
+                // הגדר עדכון אוטומטי רק לאחר שהמסך הראשי גלוי וה-fetch הראשוני בוצע
+                setInterval(fetchAlerts, UPDATE_INTERVAL_MS);
+
+                // וודא שהודעת "אין התרעות" מוצגת בהתחלה אם אין התרעות,
+                // לאחר שה-fetch הראשוני הסתיים והאלמנטים הראשיים נטענו
+                // דיליי קצרצר כדי לאפשר לפונקציית fetchAlerts לרוץ פעם אחת
+                setTimeout(() => {
+                    if (displayedAlerts.size === 0 && !document.querySelector('.no-alerts-message') && !document.querySelector('.unviewable-alerts-message')) {
                         checkAndDisplayNoAlertsMessage();
-                    }, { once: true });
-                }
-            }
-
-            // הוסף התרעות חדשות הניתנות להצגה
-            newViewableAlerts.forEach(alert => addAlertToDisplay(alert));
-
-            // אם לא הוספו התרעות ואין התרעות מוצגות, הצג הודעת "אין התרעות"
-            checkAndDisplayNoAlertsMessage();
-
-        } catch (error) {
-          console.error("Error fetching alerts:", error);
-          // הצג הודעת שגיאה על המסך כדי שהמשתמש יראה
-          // במקרה של שגיאה חמורה, נציג מלבן אדום (במקום כחול)
-          const errorLi = document.createElement("li");
-          errorLi.classList.add("alert-item"); // כדי לקבל סטיילינג בסיסי
-          errorLi.style.backgroundColor = "#e74c3c"; /* אדום לשגיאה חמורה */
-          errorLi.style.fontSize = "1.5em";
-          errorLi.style.padding = "15px";
-          errorLi.textContent = `שגיאה חמורה: לא ניתן לטעון התרעות (${error.message}). נסה לרענן.`;
-          alertsList.innerHTML = ''; // נקה הכל
-          alertsList.appendChild(errorLi);
-          displayedAlerts.clear();
-          currentViewableAlertsCount = 0;
-        }
-      }
-
-      // --- אתחול והפעלת טיימר ---
-      document.addEventListener("DOMContentLoaded", () => {
-        // טען התרעות פעם אחת מיד עם טעינת הדף, לפני הצגת האלמנטים
-        // זה מבטיח שהנתונים זמינים ברגע שהמסך הראשי מופיע
-        fetchAlerts();
-
-        // הסתר את מסך הפתיחה וחשוף את התוכן הראשי לאחר זמן קבוע
-        setTimeout(() => {
-          splashScreen.classList.add("hidden"); // התחל להסתיר את הספלאש
-          fullScreenContainer.classList.add("visible"); // התחל להציג את התוכן הראשי
-
-          // הגדר עדכון אוטומטי רק לאחר שהמסך הראשי גלוי וה-fetch הראשוני בוצע
-          setInterval(fetchAlerts, UPDATE_INTERVAL_MS);
-
-          // וודא שהודעת "אין התרעות" מוצגת בהתחלה אם אין התרעות,
-          // לאחר שה-fetch הראשוני הסתיים והאלמנטים הראשיים נטענו
-          // דיליי קצרצר כדי לאפשר לפונקציית fetchAlerts לרוץ פעם אחת
-          setTimeout(() => {
-              if (displayedAlerts.size === 0 && !document.querySelector('.no-alerts-message') && !document.querySelector('.unviewable-alerts-message')) {
-                  checkAndDisplayNoAlertsMessage();
-              }
-          }, 500); // 0.5 שניות אחרי סיום הספלאש
-        }, SPLASH_SCREEN_DURATION_MS);
-      });
-    </script>
-  </body>
+                    }
+                }, 500); // 0.5 שניות אחרי סיום הספלאש
+            }, SPLASH_SCREEN_DURATION_MS);
+        });
+    </script>
+</body>
 </html>
