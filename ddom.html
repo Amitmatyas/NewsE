@@ -274,6 +274,7 @@
 
     <script>
         const ALERTS_API_URL = "/api/notifications"; // מופנה לפרוקסי ב-Netlify
+        const ALERTS_HISTORY_API_URL = "https://api.tzevaadom.co.il/alerts-history/"; // נקודת קצה חדשה להיסטוריית התרעות
         const UPDATE_INTERVAL_MS = 1000; // כל 1 שנייה
         const MAX_ALERTS_DISPLAY = 3; // מספר ההתרעות המקסימלי שיוצגו (לפני מעבר למצב "לא ניתן להציג")
         const SPLASH_SCREEN_DURATION_MS = 2500; // משך זמן מסך הפתיחה
@@ -290,11 +291,9 @@
         const THREAT_MAP = {
             1: "חדירת כלי טיס עוין",
             0: "ירי רקטות וטילים",
-            // כל איום אחר שאינו ברשימת VIEWABLE_THREAT_TYPES ייחשב "לא ניתן להצגה"
         };
 
         // סוגי איום שניתן להציג במסך זה (ניתן להרחבה)
-        // כל איום שאינו כאן יגרום למלבן "לא ניתן להציג..."
         const VIEWABLE_THREAT_TYPES = new Set([0, 1]);
 
         /**
@@ -352,11 +351,13 @@
                 formattedAlertId = formattedAlertId.padStart(4, '0'); // מילוי באפסים מקדימה
             }
 
-            if (formattedAlertId) {
+            if (formattedAlertId && formattedAlertId !== 'null') { // וודא שה-ID לא 'null'
                 const url = `https://www.tzevaadom.co.il/alerts/${formattedAlertId}`;
                 window.open(url, "_blank"); // פותח בלשונית חדשה
             } else {
                 console.error("Attempted to navigate to alert with invalid alertId:", alertId);
+                // במקרה של ID לא תקין, הפנה לדף הראשי של צבע אדום
+                window.open("https://www.tzevaadom.co.il/", "_blank");
             }
         }
 
@@ -382,16 +383,11 @@
             unviewableBlock.textContent = `לא ניתן להציג במסך זה התראה זו, למעבר לצפייה בהתראה לחץ כאן`;
             
             // שמור את ה-alertId עבור הקישור
-            unviewableBlock.dataset.alertIdForLink = alertIdForLink || lastSeenNotificationId || '';
+            unviewableBlock.dataset.alertIdForLink = alertIdForLink || '';
 
             unviewableBlock.addEventListener('click', () => {
                 const idToNavigate = unviewableBlock.dataset.alertIdForLink;
-                if (idToNavigate) {
-                    navigateToAlert(idToNavigate);
-                } else {
-                    // אם אין alertId ספציפי, אפשר להפנות לדף הראשי של צבע אדום
-                    window.open("https://www.tzevaadom.co.il/", "_blank");
-                }
+                navigateToAlert(idToNavigate);
             });
             alertsList.appendChild(unviewableBlock);
         }
@@ -415,15 +411,28 @@
             // נבדוק האם הוספת התרעה זו תגרום לחריגה מ-MAX_ALERTS_DISPLAY
             // אם היא היתה ניתנת להצגה והיא תגרום ליותר מ-3 התרעות, נציג את המלבן הכחול
             if (isThreatViewable && currentViewableAlertsCount >= MAX_ALERTS_DISPLAY) {
-                displayUnviewableAlertBlock(alertData.notificationId);
-                lastSeenNotificationId = alertData.notificationId; // שמור את ה-ID האחרון
+                // במקרה זה, נצטרך לקרוא להיסטוריית ההתרעות כדי לקבל את ה-ID האחרון
+                fetchLastAlertHistoryId().then(historyAlertId => {
+                    displayUnviewableAlertBlock(historyAlertId);
+                    lastSeenNotificationId = historyAlertId;
+                }).catch(error => {
+                    console.error("Error fetching history ID for unviewable block:", error);
+                    displayUnviewableAlertBlock(alertData.notificationId); // חזרה ל-ID הקיים אם נכשלה קריאת ההיסטוריה
+                    lastSeenNotificationId = alertData.notificationId;
+                });
                 return; // אל תוסיף את ההתרעה הנוכחית
             }
 
             // אם ההתרעה הנוכחית עצמה אינה ניתנת להצגה
             if (!isThreatViewable) {
-                displayUnviewableAlertBlock(alertData.notificationId);
-                lastSeenNotificationId = alertData.notificationId; // שמור את ה-ID האחרון
+                fetchLastAlertHistoryId().then(historyAlertId => {
+                    displayUnviewableAlertBlock(historyAlertId);
+                    lastSeenNotificationId = historyAlertId;
+                }).catch(error => {
+                    console.error("Error fetching history ID for unviewable block:", error);
+                    displayUnviewableAlertBlock(alertData.notificationId); // חזרה ל-ID הקיים אם נכשלה קריאת ההיסטוריה
+                    lastSeenNotificationId = alertData.notificationId;
+                });
                 return; // אל תוסיף את ההתרעה הנוכחית
             }
 
@@ -457,13 +466,9 @@
             }, 3000);
 
             // וודא שלא נציג יותר מדי התרעות - הסר את הישנה ביותר
-            // (התנהגות זו מתייחסת כעת רק למצב שבו יש עד 3 התרעות)
             while (alertsList.children.length > MAX_ALERTS_DISPLAY) {
                 const oldestItem = alertsList.lastChild;
-                // וודא שאנחנו לא מסירים את המלבן הכחול אם הוא שם (לא אמור להגיע לפה, אבל ליתר ביטחון)
                 if (oldestItem && (oldestItem.classList.contains('active') || oldestItem.classList.contains('unviewable-alerts-message'))) { 
-                    // אם הגענו לכאן, זה פריט התרעה פעיל ואנחנו מעל המגבלה.
-                    // נסיר אותו רק אם הוא לא המלבן הכחול
                     if (!oldestItem.classList.contains('unviewable-alerts-message')) {
                         const oldestId = oldestItem.dataset.notificationId;
                         oldestItem.style.animation = 'fadeOutAndShrink 0.5s ease-out forwards';
@@ -476,15 +481,33 @@
                             checkAndDisplayNoAlertsMessage(); // בדוק אם צריך להציג הודעת "אין התרעות" אחרי הסרה
                         }, { once: true });
                     } else {
-                        // אם ה-lastChild הוא המלבן הכחול, פשוט הסר אותו ולא תמשיך בלולאה
                         oldestItem.remove();
                         break; 
                     }
                 } else {
-                    // אם ה-lastChild הוא לא פריט התרעה פעיל, פשוט הסר אותו
                     oldestItem.remove();
                 }
             }
+        }
+
+        /**
+         * מאחזר את ה-ID האחרון מהיסטוריית ההתרעות.
+         * @returns {Promise<string|null>} ה-ID האחרון או null אם לא נמצא.
+         */
+        async function fetchLastAlertHistoryId() {
+            try {
+                const response = await fetch(ALERTS_HISTORY_API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                }
+                const history = await response.json();
+                if (Array.isArray(history) && history.length > 0 && history[0].id) {
+                    return String(history[0].id); // החזר את ה-ID של ההתרעה האחרונה
+                }
+            } catch (error) {
+                console.error("Error fetching alerts history:", error);
+            }
+            return null;
         }
 
         /**
@@ -515,40 +538,32 @@
                     throw new Error("API response is not an array. Response received:", alerts);
                 }
 
-                // שמור את ה-ID של ההתרעות שהיו קיימות לפני העדכון
-                const previousAlertIds = new Set(displayedAlerts.keys());
-
-                // חשב כמה התרעות חדשות ניתנות להצגה הגיעו
                 const newViewableAlerts = alerts.filter(alert => 
                     VIEWABLE_THREAT_TYPES.has(alert.threat) && !displayedAlerts.has(alert.notificationId)
                 );
 
-                // אם יש התראה חדשה שאינה ניתנת להצגה
                 const newUnviewableAlert = alerts.find(alert => 
                     !VIEWABLE_THREAT_TYPES.has(alert.threat) && !displayedAlerts.has(alert.notificationId)
                 );
 
-                // אם יש יותר מדי התרעות אקטיביות חדשות, או התראה חדשה לא ניתנת להצגה
-                // נציג את המלבן הכחול ונפסיק
-                if (newUnviewableAlert || (currentViewableAlertsCount + newViewableAlerts.length > MAX_ALERTS_DISPLAY)) {
-                    // נספק את ה-ID של ההתרעה החדשה האחרונה, אם קיימת, או את ה-ID האחרון שראינו
-                    const idForLink = newUnviewableAlert ? newUnviewableAlert.notificationId : 
-                                      (alerts.length > 0 ? alerts[0].notificationId : lastSeenNotificationId);
-                    displayUnviewableAlertBlock(idForLink);
-                    lastSeenNotificationId = idForLink; // עדכן את ה-ID האחרון שנצפה
+                // אם יש התראה חדשה שאינה ניתנת להצגה או חורגת מהמגבלה
+                if (newUnviewableAlert || (currentViewableAlertsCount + newViewableAlerts.length > MAX_ALERTS_DISPLAY && newViewableAlerts.length > 0)) {
+                    const historyAlertId = await fetchLastAlertHistoryId(); // קבל את ה-ID מההיסטוריה
+                    displayUnviewableAlertBlock(historyAlertId || (newUnviewableAlert ? newUnviewableAlert.notificationId : null));
+                    lastSeenNotificationId = historyAlertId || (newUnviewableAlert ? newUnviewableAlert.notificationId : null);
                     return; // סיים כאן, רק מלבן כחול יוצג
                 }
 
                 // אם אין חריגה למצב הכחול, נמשיך לעדכן רגיל
                 // הסר התרעות שכבר לא פעילות ב-API מהתצוגה
                 const currentApiIds = new Set(alerts.map(a => a.notificationId));
-                for (const [id, element] of Array.from(displayedAlerts.entries())) { // השתמש ב-Array.from כדי לא לשנות מפה תוך כדי איטרציה
+                for (const [id, element] of Array.from(displayedAlerts.entries())) {
                     if (!currentApiIds.has(id)) {
                         element.style.animation = 'fadeOutAndShrink 0.5s ease-out forwards';
                         element.addEventListener('animationend', () => {
                             displayedAlerts.delete(id);
                             element.remove();
-                            currentViewableAlertsCount--; // הקטן את המונה
+                            currentViewableAlertsCount--;
                             checkAndDisplayNoAlertsMessage();
                         }, { once: true });
                     }
@@ -557,20 +572,17 @@
                 // הוסף התרעות חדשות הניתנות להצגה
                 newViewableAlerts.forEach(alert => addAlertToDisplay(alert));
 
-                // אם לא הוספו התרעות ואין התרעות מוצגות, הצג הודעת "אין התרעות"
                 checkAndDisplayNoAlertsMessage();
 
             } catch (error) {
                 console.error("Error fetching alerts:", error);
-                // הצג הודעת שגיאה על המסך כדי שהמשתמש יראה
-                // במקרה של שגיאה חמורה, נציג מלבן אדום (במקום כחול)
                 const errorLi = document.createElement("li");
-                errorLi.classList.add("alert-item"); // כדי לקבל סטיילינג בסיסי
-                errorLi.style.backgroundColor = "#e74c3c"; /* אדום לשגיאה חמורה */
+                errorLi.classList.add("alert-item");
+                errorLi.style.backgroundColor = "#e74c3c";
                 errorLi.style.fontSize = "1.5em";
                 errorLi.style.padding = "15px";
                 errorLi.textContent = `שגיאה חמורה: לא ניתן לטעון התרעות (${error.message}). נסה לרענן.`;
-                alertsList.innerHTML = ''; // נקה הכל
+                alertsList.innerHTML = '';
                 alertsList.appendChild(errorLi);
                 displayedAlerts.clear();
                 currentViewableAlertsCount = 0;
@@ -579,26 +591,17 @@
 
         // --- אתחול והפעלת טיימר ---
         document.addEventListener("DOMContentLoaded", () => {
-            // טען התרעות פעם אחת מיד עם טעינת הדף, לפני הצגת האלמנטים
-            // זה מבטיח שהנתונים זמינים ברגע שהמסך הראשי מופיע
-            fetchAlerts();
+            fetchAlerts(); // טען התרעות פעם אחת מיד עם טעינת הדף
 
-            // הסתר את מסך הפתיחה וחשוף את התוכן הראשי לאחר זמן קבוע
             setTimeout(() => {
-                splashScreen.classList.add("hidden"); // התחל להסתיר את הספלאש
-                fullScreenContainer.classList.add("visible"); // התחל להציג את התוכן הראשי
-
-                // הגדר עדכון אוטומטי רק לאחר שהמסך הראשי גלוי וה-fetch הראשוני בוצע
+                splashScreen.classList.add("hidden");
+                fullScreenContainer.classList.add("visible");
                 setInterval(fetchAlerts, UPDATE_INTERVAL_MS);
-
-                // וודא שהודעת "אין התרעות" מוצגת בהתחלה אם אין התרעות,
-                // לאחר שה-fetch הראשוני הסתיים והאלמנטים הראשיים נטענו
-                // דיליי קצרצר כדי לאפשר לפונקציית fetchAlerts לרוץ פעם אחת
                 setTimeout(() => {
                     if (displayedAlerts.size === 0 && !document.querySelector('.no-alerts-message') && !document.querySelector('.unviewable-alerts-message')) {
                         checkAndDisplayNoAlertsMessage();
                     }
-                }, 500); // 0.5 שניות אחרי סיום הספלאש
+                }, 500);
             }, SPLASH_SCREEN_DURATION_MS);
         });
     </script>
