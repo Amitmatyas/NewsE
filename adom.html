@@ -430,7 +430,7 @@
           fullScreenContainer.classList.add("visible"); // התחל להציג את התוכן הראשי
 
           // הגדר עדכון אוטומטי רק לאחר שהמסך הראשי גלוי וה-fetch הראשוני בוצע
-          setInterval(fetchAlerts, UPDATE_INTERVAL_INTERVAL_MS);
+          setInterval(fetchAlerts, UPDATE_INTERVAL_MS); // *** התיקון כאן: שינוי השם השגוי לשם הנכון ***
 
           // וודא שהודעת "אין התרעות" מוצגת בהתחלה אם אין התרעות,
           // לאחר שה-fetch הראשוני הסתיים והאלמנטים הראשיים נטענו
