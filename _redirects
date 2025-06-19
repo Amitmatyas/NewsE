@@ -1,2 +1,2 @@
-/api/* https://api.tzevaadom.co.il/:splat 200
+/api/notifications/* https://api.tzevaadom.co.il/:splat 200
 /api/alerts-history/* https://api.tzevaadom.co.il/alerts-history/:splat 200
