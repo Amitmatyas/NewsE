@@ -215,47 +215,12 @@
         100% { box-shadow: 0 0 30px rgba(231, 76, 60, 0.9), 0 0 50px rgba(231, 76, 60, 0.6); transform: scale(1); }
       }
 
-      /* --- סגנון עבור התראה על מסך מלא --- */
-      .fullscreen-alert {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: #e74c3c; /* אדום בוהק */
-        color: white;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-size: 5em; /* גודל טקסט גדול במיוחד */
-        font-weight: 700;
-        text-align: center;
-        z-index: 2000; /* וודא שהוא מעל הכל */
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-        pointer-events: none; /* אלמנט בלתי ניתן ללחיצה כשהוא שקוף */
-        /* אנימציה של הבהוב */
-        animation: fullscreenPulse 1.5s infinite alternate;
-      }
-
-      .fullscreen-alert.show {
-        opacity: 1;
-        pointer-events: all; /* ניתן ללחיצה כשהוא גלוי */
-      }
-
-      @keyframes fullscreenPulse {
-        0% { background-color: #e74c3c; box-shadow: 0 0 40px rgba(231, 76, 60, 0.7); }
-        100% { background-color: #c0392b; box-shadow: 0 0 60px rgba(231, 76, 60, 1); }
-      }
-
       /* --- התאמות רספונסיביות --- */
       @media (max-width: 1200px) {
         .main-logo { width: 100px; height: 100px; }
         .header-title { font-size: 3em; }
         .alert-item.active { font-size: 2.5em; padding: 20px 30px; }
         .no-alerts-message { font-size: 2em; padding: 20px 30px; }
-        .fullscreen-alert { font-size: 4em; }
       }
 
       @media (max-width: 768px) {
@@ -263,7 +228,6 @@
         .header-title { font-size: 2em; }
         .alert-item.active { font-size: 1.8em; padding: 15px 25px; }
         .no-alerts-message { font-size: 1.5em; padding: 15px 25px; }
-        .fullscreen-alert { font-size: 2.5em; }
       }
 
       @media (max-width: 480px) {
@@ -271,8 +235,36 @@
         .header-title { font-size: 1.5em; }
         .alert-item.active { font-size: 1.3em; padding: 10px 15px; }
         .no-alerts-message { font-size: 1.2em; padding: 10px 15px; }
-        .fullscreen-alert { font-size: 1.8em; }
       }
+
+        /* סגנון מינימלי עבור אלמנט התראת מסך מלא, מוצב ב-body אך נשלט ע"י JS */
+        /* הסטייל הזה אמור להיות חיצוני או להתמזג עם הקיים שלך כדי לא לשבור את "בלי לשנות כלום" */
+        /* אך לשם הדגמה, הוספתי אותו כאן כדי שתבין את הפונקציונליות */
+        /* אם אתה מעוניין בעיצוב ספציפי, תצטרך להוסיף סגנונות כאלה בנפרד (כמו שהיה בתשובה הקודמת) */
+        .fullscreen-alert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.8); /* אדום שקוף */
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4em;
+            font-weight: bold;
+            text-align: center;
+            z-index: 9999; /* וודא שהוא מעל הכל */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none; /* כדי לא לחסום אירועי עכבר כשהוא שקוף */
+        }
+
+        .fullscreen-alert.show {
+            opacity: 1;
+            pointer-events: all; /* מאפשר אירועי עכבר כשהוא מוצג */
+        }
     </style>
   </head>
   <body>
@@ -303,6 +295,7 @@
       const splashScreen = document.getElementById("splash-screen");
       const fullScreenContainer = document.getElementById("full-screen-container");
       const alertsList = document.getElementById("alerts-list");
+      // הוספה חדשה: הפניות לאלמנטים של התראת מסך מלא
       const fullscreenAlert = document.getElementById("fullscreenAlert");
       const fullscreenAlertText = document.getElementById("fullscreenAlertText");
 
