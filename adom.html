@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
- <head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NewsE - התרעות בזמן אמת</title>
@@ -236,35 +236,6 @@
         .alert-item.active { font-size: 1.3em; padding: 10px 15px; }
         .no-alerts-message { font-size: 1.2em; padding: 10px 15px; }
       }
-
-        /* סגנון מינימלי עבור אלמנט התראת מסך מלא, מוצב ב-body אך נשלט ע"י JS */
-        /* הסטייל הזה אמור להיות חיצוני או להתמזג עם הקיים שלך כדי לא לשבור את "בלי לשנות כלום" */
-        /* אך לשם הדגמה, הוספתי אותו כאן כדי שתבין את הפונקציונליות */
-        /* אם אתה מעוניין בעיצוב ספציפי, תצטרך להוסיף סגנונות כאלה בנפרד (כמו שהיה בתשובה הקודמת) */
-        .fullscreen-alert {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 0, 0, 0.8); /* אדום שקוף */
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 4em;
-            font-weight: bold;
-            text-align: center;
-            z-index: 9999; /* וודא שהוא מעל הכל */
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            pointer-events: none; /* כדי לא לחסום אירועי עכבר כשהוא שקוף */
-        }
-
-        .fullscreen-alert.show {
-            opacity: 1;
-            pointer-events: all; /* מאפשר אירועי עכבר כשהוא מוצג */
-        }
     </style>
   </head>
   <body>
@@ -281,7 +252,27 @@
       </ul>
     </div>
 
-        <div id="fullscreenAlert" class="fullscreen-alert" style="display: none;">
+        <div id="fullscreenAlert" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 0, 0, 0.9); /* אדום חזק ושקוף */
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 5em; /* גודל טקסט גדול במיוחד */
+        font-weight: 700;
+        text-align: center;
+        z-index: 9999; /* וודא שהוא מעל הכל */
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        pointer-events: none; /* כדי לא לחסום אירועי עכבר כשהוא שקוף */
+        /* כאן תהיה אנימציית הבהוב שתוגדר ב-JS אם נדרש */
+    ">
       <p id="fullscreenAlertText"></p>
     </div>
 
@@ -341,16 +332,13 @@
        */
       function showFullscreenAlert(message) {
         fullscreenAlertText.textContent = message;
-        fullscreenAlert.style.display = 'flex'; // וודא שאלמנט ה-div גלוי לפני הוספת הקלאס
-        setTimeout(() => {
-          fullscreenAlert.classList.add('show');
-        }, 10); // השהיה קצרה להפעלת transition
+        // הפעל את האנימציה ישירות כאן
+        fullscreenAlert.style.opacity = '1';
+        fullscreenAlert.style.pointerEvents = 'all';
 
         setTimeout(() => {
-          fullscreenAlert.classList.remove('show');
-          setTimeout(() => {
-            fullscreenAlert.style.display = 'none'; // הסתר לחלוטין אחרי שהאנימציה הסתיימה
-          }, 300); // תואם ל-transition opacity
+          fullscreenAlert.style.opacity = '0';
+          fullscreenAlert.style.pointerEvents = 'none';
         }, FULLSCREEN_ALERT_DURATION_MS);
       }
 
@@ -494,7 +482,7 @@
           fullScreenContainer.classList.add("visible"); // התחל להציג את התוכן הראשי
 
           // הגדר עדכון אוטומטי רק לאחר שהמסך הראשי גלוי וה-fetch הראשוני בוצע
-          setInterval(fetchAlerts, UPDATE_INTERVAL_MS); // *** התיקון כאן: שינוי השם השגוי לשם הנכון ***
+          setInterval(fetchAlerts, UPDATE_INTERVAL_MS);
 
           // וודא שהודעת "אין התרעות" מוצגת בהתחלה אם אין התרעות,
           // לאחר שה-fetch הראשוני הסתיים והאלמנטים הראשיים נטענו
